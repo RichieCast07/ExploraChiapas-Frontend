@@ -1,0 +1,12 @@
+/* core/shared/layout/DashboardLayout.css */
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.dashboard-layout__content {
+  flex: 1;
+  background-color: #ffffff;
+  overflow-y: auto;
+}

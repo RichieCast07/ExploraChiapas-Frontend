@@ -1,0 +1,363 @@
+/* src/features/Auth/presentation/pages/Register.css */
+
+/* ── Root ── */
+.register-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #eef3ee 0%, #d4e4d4 100%);
+  padding: 24px 16px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ── Card ── */
+.register-card {
+  background: #ffffff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Header ── */
+.register-header {
+  padding: 32px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.register-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  margin-bottom: 4px;
+}
+
+.register-brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1b6b3a;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.register-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 12px 0 4px 0;
+  letter-spacing: -0.3px;
+}
+
+.register-subtitle {
+  font-size: 0.85rem;
+  color: #8a8a8a;
+  margin: 0;
+  letter-spacing: 0.1px;
+}
+
+/* ── Divider ── */
+.register-divider {
+  height: 1px;
+  background: #f0f0f0;
+  margin: 0 40px;
+}
+
+/* ── Form ── */
+.register-form {
+  padding: 28px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Error */
+.register-error {
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #c53030;
+}
+
+/* Field */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4a4a4a;
+  letter-spacing: 0.1px;
+}
+
+.field-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field-icon {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.field-input {
+  width: 100%;
+  padding: 12px 14px 12px 40px;
+  border: 1.5px solid #e8e8e8;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #1b1b1b;
+  background: #fafafa;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.field-input::placeholder {
+  color: #c4c4c4;
+}
+
+.field-input:focus {
+  border-color: #1b6b3a;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(27, 107, 58, 0.08);
+}
+
+.field-input-error {
+  border-color: #e53e3e !important;
+  background: #fffafa !important;
+}
+
+.field-input-error:focus {
+  box-shadow: 0 0 0 4px rgba(229, 62, 62, 0.08) !important;
+}
+
+.field-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239e9e9e' stroke-width='2' stroke-linecap='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+
+.field-select option {
+  padding: 8px;
+}
+
+.field-eye {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  color: #9e9e9e;
+  transition: color 0.2s;
+}
+
+.field-eye:hover {
+  color: #4a4a4a;
+}
+
+/* Password hints */
+.password-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-top: 2px;
+}
+
+.hint-text {
+  color: #9e9e9e;
+}
+
+.password-strength {
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.password-strength.weak {
+  color: #e53e3e;
+}
+
+.password-strength.medium {
+  color: #d69e2e;
+}
+
+.password-strength.strong {
+  color: #38a169;
+}
+
+.password-error-hint {
+  font-size: 0.78rem;
+  color: #e53e3e;
+  margin-top: 2px;
+}
+
+/* Terms */
+.terms-group {
+  margin: 4px 0;
+}
+
+.terms-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.8rem;
+  color: #5a5a5a;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.terms-check {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  accent-color: #1b6b3a;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.terms-label a {
+  color: #1b6b3a;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-label a:hover {
+  text-decoration: underline;
+}
+
+/* Button */
+.btn-register {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: #1b6b3a;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s, transform 0.15s;
+  margin-top: 4px;
+}
+
+.btn-register:hover:not(:disabled) {
+  background: #145530;
+  transform: translateY(-1px);
+}
+
+.btn-register:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-register:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Spinner */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Footer ── */
+.register-footer {
+  padding: 16px 40px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.footer-login {
+  font-size: 0.9rem;
+  color: #5a5a5a;
+}
+
+.link-login {
+  font-weight: 600;
+  color: #1b6b3a;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.link-login:hover {
+  color: #145530;
+  text-decoration: underline;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .register-header,
+  .register-form,
+  .register-footer {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .register-title {
+    font-size: 1.15rem;
+  }
+
+  .register-divider {
+    margin: 0 24px;
+  }
+
+  .terms-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* ── Transitions ── */
+.field-input,
+.btn-register,
+.terms-check,
+.field-eye {
+  transition: all 0.2s ease;
+}
