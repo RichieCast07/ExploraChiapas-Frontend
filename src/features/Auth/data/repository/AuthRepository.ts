@@ -1,6 +1,5 @@
 import { User } from '../models/User';
-
-const BASE_URL = 'https://explora-chiapas.onrender.com/v1/api';
+import { BASE_URL } from '../../../../core/shared/config/api';
 
 export interface IAuthRepository {
   login(email: string, password: string): Promise<User>;

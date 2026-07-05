@@ -7,9 +7,8 @@ import {
   Users,
   Store,
   MapPin,
-  AlertTriangle,
+  CheckCircle,
   ArrowUp,
-  ArrowDown,
   MoreVertical,
   MapPinPlus,
   UserCheck,
@@ -17,8 +16,8 @@ import {
 } from 'lucide-react';
 import { LineChart, Line, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import './ AdminHome.css';
+import { useAdminStatsViewModel } from '../viewmodels/useAdminStatsViewModel';
 
-// ---- Datos ficticios (mock) ----
 const usuariosPorMes = [
   { mes: 'ENE', actual: 12000, anterior: 9000 },
   { mes: 'FEB', actual: 14500, anterior: 10500 },
@@ -62,6 +61,10 @@ const accionesRapidas = [
 ];
 
 export function AdminHomePage() {
+  const { stats, isLoading } = useAdminStatsViewModel();
+
+  const val = (n: number | undefined) => isLoading ? '...' : (n?.toLocaleString() ?? '0');
+
   return (
     <div className="admin-layout">
       <Sidebar config={adminNavConfig} onLogout={() => console.log('logout')} />
@@ -100,46 +103,44 @@ export function AdminHomePage() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="stats-grid">
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--green"><Users size={20} /></div>
-                <span className="stats-card__change positive"><ArrowUp size={12} /> 12%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> activos</span>
               </div>
               <p className="stats-card__label">USUARIOS REGISTRADOS</p>
-              <p className="stats-card__value">24,892</p>
-              <p className="stats-card__footer">vs. mes anterior (22,100)</p>
+              <p className="stats-card__value">{val(stats?.totalUsuarios)}</p>
+              <p className="stats-card__footer">usuarios activos en la plataforma</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--orange"><Store size={20} /></div>
-                <span className="stats-card__change positive"><ArrowUp size={12} /> 5.4%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> total</span>
               </div>
               <p className="stats-card__label">NEGOCIOS TURÍSTICOS</p>
-              <p className="stats-card__value">1,204</p>
-              <p className="stats-card__footer">18 nuevos esta semana</p>
+              <p className="stats-card__value">{val(stats?.totalNegocios)}</p>
+              <p className="stats-card__footer">registrados en la plataforma</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--blue"><MapPin size={20} /></div>
-                <span className="stats-card__change negative"><ArrowDown size={12} /> 2%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> total</span>
               </div>
               <p className="stats-card__label">DESTINOS TURÍSTICOS</p>
-              <p className="stats-card__value">458</p>
-              <p className="stats-card__footer">En 12 categorías diferentes</p>
+              <p className="stats-card__value">{val(stats?.totalDestinos)}</p>
+              <p className="stats-card__footer">destinos activos</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
-                <div className="stats-card__icon stats-card__icon--red"><AlertTriangle size={20} /></div>
-                <span className="stats-card__badge">Urgent</span>
+                <div className="stats-card__icon stats-card__icon--green"><CheckCircle size={20} /></div>
               </div>
-              <p className="stats-card__label">REPORTES PENDIENTES</p>
-              <p className="stats-card__value stats-card__value--red">14</p>
-              <p className="stats-card__footer">Requieren moderación hoy</p>
+              <p className="stats-card__label">NEGOCIOS VERIFICADOS</p>
+              <p className="stats-card__value">{val(stats?.negociosVerificados)}</p>
+              <p className="stats-card__footer">con verificación activa</p>
             </div>
           </div>
 
