@@ -16,7 +16,7 @@ import {
   CalendarPlus,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import '../pages/ AdminHome.css';
+import './ AdminHome.css';
 
 // ---- Datos ficticios (mock) ----
 const usuariosPorMes = [

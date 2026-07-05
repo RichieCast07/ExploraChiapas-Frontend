@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Megaphone, ImagePlus, ChevronRight } from 'lucide-react';
-import '../pages/FormularioPromociones.css';
+import './FormularioPromociones.css';
 
 const usuario = { nombre: 'Selva Verde Resort', rol: 'Administrador', avatarUrl: '' };
 
