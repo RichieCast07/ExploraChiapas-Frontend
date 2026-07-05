@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoginUseCase } from '../../domain/LoginUseCase';
 import { AuthRepository } from '../../data/repository/AuthRepository';
+import { BASE_URL } from '../../../../core/shared/config/api';
 
 export function useLoginViewModel() {
   const [email, setEmail] = useState('');
@@ -28,7 +29,15 @@ export function useLoginViewModel() {
       localStorage.setItem('token', user.token);
       localStorage.setItem('user_name', user.name);
 
-      navigate('/admin/dashboard');
+      const probe = await fetch(`${BASE_URL}/stats/system`, {
+        headers: { Authorization: `Bearer ${user.token}` },
+      });
+
+      if (probe.status === 200) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/negocio/inicio');
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
       setError(message);
