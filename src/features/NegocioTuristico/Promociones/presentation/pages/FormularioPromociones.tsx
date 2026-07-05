@@ -1,14 +1,14 @@
-// features/NegocioTuristico/Promociones/presentation/pages/NuevaPromocionPage.tsx
+// features/NegocioTuristico/Promociones/presentation/pages/FormularioPromociones.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Megaphone, ImagePlus, ChevronRight } from 'lucide-react';
-import '../pages/FormularioPromociones.css';
+import './FormularioPromociones.css';
 
 const usuario = { nombre: 'Selva Verde Resort', rol: 'Administrador', avatarUrl: '' };
 
-export function NuevaPromocionPage() {
+export function FormularioPromociones() {
   const navigate = useNavigate();
 
   const [titulo, setTitulo] = useState('');
