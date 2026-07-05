@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BASE_URL } from '../../../../../core/shared/config/api';
+import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
 export interface Promocion {
   id: string;
@@ -33,11 +34,7 @@ export function usePromocionesViewModel() {
   };
 
   const eliminar = async (id: string) => {
-    const token = localStorage.getItem('token');
-    const res = await fetch(`${BASE_URL}/promotions/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-    });
+    const res = await fetchAuth(`${BASE_URL}/promotions/${id}`, { method: 'DELETE' });
     if (res.ok) {
       setPromociones(prev => prev.filter(p => p.id !== id));
     }

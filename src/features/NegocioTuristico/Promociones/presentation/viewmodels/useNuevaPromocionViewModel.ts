@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BASE_URL } from '../../../../../core/shared/config/api';
+import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
 export function useNuevaPromocionViewModel() {
   const [titulo, setTitulo] = useState('');
@@ -12,10 +13,7 @@ export function useNuevaPromocionViewModel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    fetch(`${BASE_URL}/businesses/mine`, {
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-    })
+    fetchAuth(`${BASE_URL}/businesses/mine`)
       .then(res => res.json())
       .then(body => {
         if (body.success && body.data?.length) {
@@ -39,13 +37,9 @@ export function useNuevaPromocionViewModel() {
     setIsLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BASE_URL}/promotions`, {
+      const res = await fetchAuth(`${BASE_URL}/promotions`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token ?? ''}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           titulo,
           descripcion: descripcion || null,

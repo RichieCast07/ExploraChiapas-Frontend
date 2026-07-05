@@ -1,4 +1,3 @@
-// features/SistemaAdministrador/Home/presentation/pages/AdminHomePage.tsx
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
 import {
@@ -17,6 +16,7 @@ import {
 import { LineChart, Line, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import './ AdminHome.css';
 import { useAdminStatsViewModel } from '../viewmodels/useAdminStatsViewModel';
+import { logout } from '../../../../../core/shared/utils/auth';
 
 const usuariosPorMes = [
   { mes: 'ENE', actual: 12000, anterior: 9000 },
@@ -67,7 +67,7 @@ export function AdminHomePage() {
 
   return (
     <div className="admin-layout">
-      <Sidebar config={adminNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={adminNavConfig} onLogout={logout} />
 
       <div className="admin-layout__main">
         {/* Header */}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BASE_URL } from '../../../../../core/shared/config/api';
+import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
 interface NegocioStats {
   negocioNombre: string;
@@ -14,11 +15,7 @@ export function useNegocioStatsViewModel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-
-    fetch(`${BASE_URL}/businesses/mine`, {
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-    })
+    fetchAuth(`${BASE_URL}/businesses/mine`)
       .then(res => res.json())
       .then(async body => {
         if (!body.success || !body.data?.length) {
@@ -29,9 +26,7 @@ export function useNegocioStatsViewModel() {
 
         const negocio = body.data[0];
 
-        const statsRes = await fetch(`${BASE_URL}/stats/businesses/${negocio.id}`, {
-          headers: { Authorization: `Bearer ${token ?? ''}` },
-        });
+        const statsRes = await fetchAuth(`${BASE_URL}/stats/businesses/${negocio.id}`);
         const statsBody = await statsRes.json();
 
         if (statsBody.success) {

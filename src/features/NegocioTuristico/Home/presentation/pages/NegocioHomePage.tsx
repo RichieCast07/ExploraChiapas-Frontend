@@ -1,9 +1,9 @@
-// features/NegocioTuristico/Home/presentation/pages/NegocioHomePage.tsx
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Heart, MessageSquare, Star } from 'lucide-react';
 import './NegocioHomePage.css';
 import { useNegocioStatsViewModel } from '../viewmodels/useNegocioStatsViewModel';
+import { logout } from '../../../../../core/shared/utils/auth';
 
 export function NegocioHomePage() {
   const { stats, isLoading, error } = useNegocioStatsViewModel();
@@ -13,7 +13,7 @@ export function NegocioHomePage() {
 
   return (
     <div className="negocio-layout">
-      <Sidebar config={negocioNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={negocioNavConfig} onLogout={logout} />
 
       <div className="negocio-layout__main">
         <header className="negocio-header">

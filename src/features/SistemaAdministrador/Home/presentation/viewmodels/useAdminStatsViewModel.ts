@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BASE_URL } from '../../../../../core/shared/config/api';
+import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
 interface SystemStats {
   totalUsuarios: number;
@@ -14,11 +15,7 @@ export function useAdminStatsViewModel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-
-    fetch(`${BASE_URL}/stats/system`, {
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-    })
+    fetchAuth(`${BASE_URL}/stats/system`)
       .then(res => res.json())
       .then(body => {
         if (body.success) {

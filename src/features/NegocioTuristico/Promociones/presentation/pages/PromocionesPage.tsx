@@ -1,10 +1,10 @@
-// features/NegocioTuristico/Promociones/presentation/pages/PromocionesPage.tsx
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Plus, Calendar, Trash2 } from 'lucide-react';
 import './PromocionesPage.css';
 import { usePromocionesViewModel } from '../viewmodels/usePromocionesViewModel';
+import { logout } from '../../../../../core/shared/utils/auth';
 
 function formatFecha(fecha: string) {
   return new Date(fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -17,7 +17,7 @@ export function PromocionesPage() {
 
   return (
     <div className="promo-layout">
-      <Sidebar config={negocioNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={negocioNavConfig} onLogout={logout} />
 
       <div className="promo-layout__main">
         <header className="promo-header">
