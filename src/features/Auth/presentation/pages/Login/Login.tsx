@@ -35,7 +35,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="login-error">
-              <span>⚠️ {error}</span>
+            <span>{error}</span>
             </div>
           )}
 

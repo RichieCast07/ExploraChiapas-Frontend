@@ -1,4 +1,3 @@
-// src/features/Auth/viewmodels/useRegisterViewModel.ts
 import { useState } from 'react';
 import { RegisterUseCase } from '../../domain/RegisterUseCase';
 
@@ -66,7 +65,6 @@ export function useRegisterViewModel() {
       });
 
       if (result.success) {
-        // Redirigir al login o mostrar mensaje de éxito
         window.location.href = '/login?registered=true';
       } else {
         setError(result.message || 'Error al registrar el usuario');
