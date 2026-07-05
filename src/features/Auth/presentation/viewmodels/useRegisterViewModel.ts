@@ -61,7 +61,7 @@ export function useRegisterViewModel() {
       const result = await registerUseCase.execute({
         fullName,
         email,
-        role,
+        userType: role as 'turista_nacional' | 'turista_extranjero' | 'habitante_local',
         password,
       });
 

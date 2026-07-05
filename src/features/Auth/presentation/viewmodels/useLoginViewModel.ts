@@ -1,6 +1,8 @@
 // features/Auth/presentation/viewmodels/useLoginViewModel.ts
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LoginUseCase } from '../../domain/LoginUseCase';
+import { AuthRepository } from '../../data/repository/AuthRepository';
 
 export function useLoginViewModel() {
   const [email, setEmail] = useState('');
@@ -12,16 +14,28 @@ export function useLoginViewModel() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError('Ingresa tu correo y contraseña');
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
-    // Simula un pequeño delay, como si fuera una petición real
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const loginUseCase = new LoginUseCase(new AuthRepository());
+      const user = await loginUseCase.execute(email, password);
 
-    setIsLoading(false);
+      localStorage.setItem('token', user.token);
+      localStorage.setItem('user_name', user.name);
 
-    // Por ahora, sin validar nada, solo redirige al Home
-    navigate('/admin/dashboard');
+      navigate('/admin/dashboard');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {

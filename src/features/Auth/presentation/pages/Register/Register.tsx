@@ -30,9 +30,10 @@ export default function RegisterPage() {
     handleRegister();
   };
 
-  const roles = [
-    'Administrador del Sistema',
-    'Negocio Turístico Local'
+  const roles: { label: string; value: string }[] = [
+    { label: 'Turista Nacional', value: 'turista_nacional' },
+    { label: 'Turista Extranjero', value: 'turista_extranjero' },
+    { label: 'Habitante Local', value: 'habitante_local' },
   ];
 
   return (
@@ -116,7 +117,7 @@ export default function RegisterPage() {
               >
                 <option value="">Selecciona tu rol...</option>
                 {roles.map(r => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
             </div>
