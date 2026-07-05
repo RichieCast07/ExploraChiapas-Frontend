@@ -1,4 +1,3 @@
-// src/features/Auth/presentation/pages/RegisterPage.tsx
 import React, { useState } from 'react';
 import { useRegisterViewModel } from '../../viewmodels/useRegisterViewModel';
 import './Register.css';
@@ -30,9 +29,10 @@ export default function RegisterPage() {
     handleRegister();
   };
 
-  const roles = [
-    'Administrador del Sistema',
-    'Negocio Turístico Local'
+  const roles: { label: string; value: string }[] = [
+    { label: 'Turista Nacional', value: 'turista_nacional' },
+    { label: 'Turista Extranjero', value: 'turista_extranjero' },
+    { label: 'Habitante Local', value: 'habitante_local' },
   ];
 
   return (
@@ -50,11 +50,10 @@ export default function RegisterPage() {
         <form className="register-form" onSubmit={onSubmit} noValidate>
           {error && (
             <div className="register-error">
-              <span>⚠️ {error}</span>
+              <span>{error}</span>
             </div>
           )}
 
-          {/* Nombre Completo */}
           <div className="field-group">
             <label className="field-label">Nombre Completo</label>
             <div className="field-input-wrap">
@@ -76,7 +75,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Correo Corporativo */}
           <div className="field-group">
             <label className="field-label">Correo Corporativo</label>
             <div className="field-input-wrap">
@@ -98,7 +96,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Rol / Departamento - ACTUALIZADO CON LOS NUEVOS ROLES */}
           <div className="field-group">
             <label className="field-label">Rol / Departamento</label>
             <div className="field-input-wrap">
@@ -116,13 +113,12 @@ export default function RegisterPage() {
               >
                 <option value="">Selecciona tu rol...</option>
                 {roles.map(r => (
-                  <option key={r} value={r}>{r}</option>
+                  <option key={r.value} value={r.value}>{r.label}</option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Contraseña */}
           <div className="field-group">
             <label className="field-label">Contraseña</label>
             <div className="field-input-wrap">
@@ -172,7 +168,6 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Confirmar Contraseña */}
           <div className="field-group">
             <label className="field-label">Confirmar Contraseña</label>
             <div className="field-input-wrap">
@@ -212,11 +207,10 @@ export default function RegisterPage() {
               </button>
             </div>
             {confirmPassword && password && password !== confirmPassword && (
-              <div className="password-error-hint">⚠️ Las contraseñas no coinciden</div>
+              <div className="password-error-hint">Las contraseñas no coinciden</div>
             )}
           </div>
 
-          {/* Términos - ACTUALIZADO CON LOS LINKS CORRECTOS */}
           <div className="terms-group">
             <label className="terms-label">
               <input
@@ -280,7 +274,6 @@ export default function RegisterPage() {
   );
 }
 
-// Funciones auxiliares para la fortaleza de la contraseña
 function getPasswordStrength(password: string): string {
   if (password.length < 6) return 'weak';
   if (password.length < 10) return 'medium';
@@ -290,9 +283,9 @@ function getPasswordStrength(password: string): string {
 function getPasswordStrengthLabel(password: string): string {
   const strength = getPasswordStrength(password);
   const labels = {
-    weak: '🔴 Débil',
-    medium: '🟡 Media',
-    strong: '🟢 Fuerte'
+    weak: 'Débil',
+    medium: 'Media',
+    strong: 'Fuerte'
   };
   return labels[strength as keyof typeof labels] || '';
 }
