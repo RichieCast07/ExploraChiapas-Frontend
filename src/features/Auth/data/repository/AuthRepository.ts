@@ -1,4 +1,5 @@
 import { User } from '../models/User';
+import { BASE_URL } from '../../../../core/shared/config/api';
 
 export interface IAuthRepository {
   login(email: string, password: string): Promise<User>;
@@ -6,29 +7,25 @@ export interface IAuthRepository {
 
 export class AuthRepository implements IAuthRepository {
   async login(email: string, password: string): Promise<User> {
-    // Mock — reemplazar con llamada real al backend
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await fetch(`${BASE_URL}/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-    if (email === 'admin@explorachiapas.com' && password === 'admin123') {
-      return {
-        id: '1',
-        name: 'Administrador',
-        email,
-        role: 'admin',
-        token: 'mock-jwt-token-admin',
-      };
+    const body = await response.json();
+
+    if (!response.ok) {
+      throw new Error(body.message ?? 'Credenciales incorrectas');
     }
 
-    if (email === 'negocio@explorachiapas.com' && password === 'negocio123') {
-      return {
-        id: '2',
-        name: 'Negocio Turístico',
-        email,
-        role: 'negocio',
-        token: 'mock-jwt-token-negocio',
-      };
-    }
+    const { token, user } = body.data;
 
-    throw new Error('Credenciales incorrectas');
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      token,
+    };
   }
 }

@@ -1,4 +1,3 @@
-// features/SistemaAdministrador/Home/presentation/pages/AdminHomePage.tsx
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
 import {
@@ -7,18 +6,18 @@ import {
   Users,
   Store,
   MapPin,
-  AlertTriangle,
+  CheckCircle,
   ArrowUp,
-  ArrowDown,
   MoreVertical,
   MapPinPlus,
   UserCheck,
   CalendarPlus,
 } from 'lucide-react';
 import { LineChart, Line, XAxis, ResponsiveContainer, Tooltip } from 'recharts';
-import '../pages/ AdminHome.css';
+import './ AdminHome.css';
+import { useAdminStatsViewModel } from '../viewmodels/useAdminStatsViewModel';
+import { logout } from '../../../../../core/shared/utils/auth';
 
-// ---- Datos ficticios (mock) ----
 const usuariosPorMes = [
   { mes: 'ENE', actual: 12000, anterior: 9000 },
   { mes: 'FEB', actual: 14500, anterior: 10500 },
@@ -62,9 +61,14 @@ const accionesRapidas = [
 ];
 
 export function AdminHomePage() {
+  const { stats, isLoading } = useAdminStatsViewModel();
+  const userName = localStorage.getItem('user_name') ?? 'Admin';
+
+  const val = (n: number | undefined) => isLoading ? '...' : (n?.toLocaleString() ?? '0');
+
   return (
     <div className="admin-layout">
-      <Sidebar config={adminNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={adminNavConfig} onLogout={logout} />
 
       <div className="admin-layout__main">
         {/* Header */}
@@ -79,10 +83,10 @@ export function AdminHomePage() {
             </button>
             <div className="admin-header__user">
               <div className="admin-header__user-info">
-                <span className="admin-header__user-name">Admin Explora</span>
+                <span className="admin-header__user-name">{userName}</span>
                 <span className="admin-header__user-role">SUPER ADMINISTRADOR</span>
               </div>
-              <div className="admin-header__avatar">A</div>
+              <div className="admin-header__avatar">{userName.charAt(0).toUpperCase()}</div>
             </div>
           </div>
         </header>
@@ -100,46 +104,44 @@ export function AdminHomePage() {
             </div>
           </div>
 
-          {/* Stats */}
           <div className="stats-grid">
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--green"><Users size={20} /></div>
-                <span className="stats-card__change positive"><ArrowUp size={12} /> 12%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> activos</span>
               </div>
               <p className="stats-card__label">USUARIOS REGISTRADOS</p>
-              <p className="stats-card__value">24,892</p>
-              <p className="stats-card__footer">vs. mes anterior (22,100)</p>
+              <p className="stats-card__value">{val(stats?.totalUsuarios)}</p>
+              <p className="stats-card__footer">usuarios activos en la plataforma</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--orange"><Store size={20} /></div>
-                <span className="stats-card__change positive"><ArrowUp size={12} /> 5.4%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> total</span>
               </div>
               <p className="stats-card__label">NEGOCIOS TURÍSTICOS</p>
-              <p className="stats-card__value">1,204</p>
-              <p className="stats-card__footer">18 nuevos esta semana</p>
+              <p className="stats-card__value">{val(stats?.totalNegocios)}</p>
+              <p className="stats-card__footer">registrados en la plataforma</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
                 <div className="stats-card__icon stats-card__icon--blue"><MapPin size={20} /></div>
-                <span className="stats-card__change negative"><ArrowDown size={12} /> 2%</span>
+                <span className="stats-card__change positive"><ArrowUp size={12} /> total</span>
               </div>
               <p className="stats-card__label">DESTINOS TURÍSTICOS</p>
-              <p className="stats-card__value">458</p>
-              <p className="stats-card__footer">En 12 categorías diferentes</p>
+              <p className="stats-card__value">{val(stats?.totalDestinos)}</p>
+              <p className="stats-card__footer">destinos activos</p>
             </div>
 
             <div className="stats-card">
               <div className="stats-card__top">
-                <div className="stats-card__icon stats-card__icon--red"><AlertTriangle size={20} /></div>
-                <span className="stats-card__badge">Urgent</span>
+                <div className="stats-card__icon stats-card__icon--green"><CheckCircle size={20} /></div>
               </div>
-              <p className="stats-card__label">REPORTES PENDIENTES</p>
-              <p className="stats-card__value stats-card__value--red">14</p>
-              <p className="stats-card__footer">Requieren moderación hoy</p>
+              <p className="stats-card__label">NEGOCIOS VERIFICADOS</p>
+              <p className="stats-card__value">{val(stats?.negociosVerificados)}</p>
+              <p className="stats-card__footer">con verificación activa</p>
             </div>
           </div>
 

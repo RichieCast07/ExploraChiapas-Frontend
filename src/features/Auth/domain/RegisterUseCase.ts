@@ -1,9 +1,9 @@
-// src/features/Auth/domain/RegisterUseCase.ts
+import { BASE_URL } from '../../../core/shared/config/api';
 
 export interface RegisterParams {
   fullName: string;
   email: string;
-  role: string;
+  userType: 'turista_nacional' | 'turista_extranjero' | 'habitante_local';
   password: string;
 }
 
@@ -16,33 +16,33 @@ export interface RegisterResult {
 export class RegisterUseCase {
   async execute(params: RegisterParams): Promise<RegisterResult> {
     try {
-      // Aquí iría la llamada a tu API
-      // const response = await fetch('/api/auth/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(params),
-      // });
-      // const data = await response.json();
+      const response = await fetch(`${BASE_URL}/users/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: params.fullName,
+          email: params.email,
+          password: params.password,
+          phone: null,
+          userType: params.userType,
+        }),
+      });
 
-      // Simulación de respuesta
-      console.log('Registrando usuario:', params);
+      const body = await response.json();
 
-      // Simular delay de red
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!response.ok) {
+        return {
+          success: false,
+          message: body.message ?? 'Error al registrar el usuario',
+        };
+      }
 
-      // Simular éxito
       return {
         success: true,
         message: 'Usuario registrado exitosamente',
-        userId: 'user_123456',
+        userId: body.data?.id,
       };
-
-      // Simular error
-      // return {
-      //   success: false,
-      //   message: 'El correo ya está registrado',
-      // };
-    } catch (error) {
+    } catch {
       return {
         success: false,
         message: 'Error de conexión con el servidor',
