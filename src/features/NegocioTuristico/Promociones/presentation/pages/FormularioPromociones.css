@@ -1,0 +1,211 @@
+/* features/NegocioTuristico/Promociones/presentation/pages/NuevaPromocionPage.css */
+
+* { box-sizing: border-box; }
+
+.nueva-promo-layout { display: flex; min-height: 100vh; }
+
+.nueva-promo-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 260px;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+/* Header */
+.nueva-promo-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #f9faf8;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.nueva-promo-header__brand { font-size: 20px; font-weight: 700; color: #15803d; }
+.nueva-promo-header__right { display: flex; align-items: center; gap: 16px; }
+.nueva-promo-header__bell { background: none; border: none; cursor: pointer; color: #4b5563; }
+.nueva-promo-header__divider { width: 1px; height: 28px; background: #e5e7eb; }
+.nueva-promo-header__user { display: flex; align-items: center; gap: 10px; }
+.nueva-promo-header__user-info { display: flex; flex-direction: column; align-items: flex-end; }
+.nueva-promo-header__user-name { font-size: 14px; font-weight: 600; color: #111827; }
+.nueva-promo-header__user-role { font-size: 12px; color: #9ca3af; }
+.nueva-promo-header__avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #15803d; color: #fff; display: flex;
+  align-items: center; justify-content: center; font-weight: 700;
+}
+
+/* Content */
+.nueva-promo-content {
+  padding: 32px;
+  flex: 1;
+  overflow-y: auto;
+  max-width: 960px;
+}
+
+.nueva-promo-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+.nueva-promo-breadcrumb .active { color: #15803d; }
+
+.nueva-promo-title { font-size: 28px; color: #111827; margin-bottom: 8px; }
+.nueva-promo-subtitle { font-size: 14px; color: #6b7280; margin-bottom: 24px; }
+
+/* Card del formulario */
+.nueva-promo-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.nueva-promo-card__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: #f9faf8;
+  border-bottom: 1px solid #e5e7eb;
+  color: #15803d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.nueva-promo-card__body {
+  padding: 24px;
+  background: #f9faf8;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 13px; font-weight: 600; color: #374151; }
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="date"],
+.form-group textarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #15803d;
+}
+
+.input-suffix {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-suffix input { width: 100%; padding-right: 32px; }
+.input-suffix span {
+  position: absolute;
+  right: 14px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Upload box */
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  background: #fff;
+  padding: 40px 20px;
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease;
+}
+.upload-box:hover { border-color: #15803d; }
+
+.upload-box__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e6f4ea;
+  color: #15803d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.upload-box__text { font-size: 14px; color: #374151; margin-bottom: 4px; }
+.upload-box__hint { font-size: 12px; color: #9ca3af; }
+.upload-box__preview {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* Footer del formulario */
+.nueva-promo-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 24px;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+  background: none;
+  border: none;
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-publish {
+  background: #15803d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-publish:hover { background: #166534; }
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .nueva-promo-layout__main { margin-left: 220px; }
+}
+@media (max-width: 768px) {
+  .nueva-promo-layout__main { margin-left: 0; }
+  .nueva-promo-header { padding: 0 20px 0 64px; }
+  .nueva-promo-content { padding: 20px; }
+  .form-row { grid-template-columns: 1fr; }
+}

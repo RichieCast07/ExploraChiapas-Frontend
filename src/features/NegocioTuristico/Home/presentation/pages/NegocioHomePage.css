@@ -1,0 +1,212 @@
+/* features/NegocioTuristico/Home/presentation/pages/NegocioHomePage.css */
+
+* {
+  box-sizing: border-box;
+}
+
+.negocio-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.negocio-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 260px;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+/* ---------- HEADER ---------- */
+.negocio-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #f9faf8;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.negocio-header__brand {
+  font-size: 20px;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.negocio-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.negocio-header__bell {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4b5563;
+  display: flex;
+}
+
+.negocio-header__divider {
+  width: 1px;
+  height: 28px;
+  background: #e5e7eb;
+}
+
+.negocio-header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.negocio-header__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.negocio-header__user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.negocio-header__user-role {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.negocio-header__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.negocio-header__avatar--placeholder {
+  background: #15803d;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* ---------- CONTENT ---------- */
+.negocio-content {
+  padding: 32px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.negocio-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.negocio-stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.negocio-stat-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.negocio-stat-card__label {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.negocio-stat-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon--green { background: #e6f4ea; color: #16a34a; }
+.icon--blue { background: #e6f0fd; color: #2563eb; }
+.icon--orange { background: #fdf0e9; color: #ea7c2e; }
+.icon--yellow { background: #fef9e6; color: #f59e0b; }
+
+.negocio-stat-card__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.negocio-stat-card__value {
+  font-size: 30px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.negocio-stat-card__change {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.negocio-stat-card__change.positive { color: #16a34a; }
+.negocio-stat-card__change.negative { color: #dc2626; }
+
+.negocio-stat-card__footer {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.negocio-stat-card__stars {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1024px) {
+  .negocio-layout__main {
+    margin-left: 220px;
+  }
+  .negocio-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .negocio-layout__main {
+    margin-left: 0;
+  }
+  .negocio-header {
+    padding: 0 20px 0 64px; /* deja espacio para el botón hamburguesa del sidebar */
+  }
+  .negocio-content {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .negocio-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
