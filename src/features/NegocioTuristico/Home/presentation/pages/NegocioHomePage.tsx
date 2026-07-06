@@ -2,7 +2,7 @@
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Eye, Route, MousePointerClick, Star, ArrowUp, ArrowDown } from 'lucide-react';
-import './NegocioHomePage.css';
+import './NegocioHomePage.css'; 
 
 // ---- Datos ficticios (mock) ----
 const stats = {
