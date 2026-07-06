@@ -1,13 +1,22 @@
+<<<<<<< HEAD
+// features/NegocioTuristico/Promociones/presentation/pages/FormularioPromociones.tsx
+=======
+>>>>>>> origin/richie
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Megaphone, ImagePlus, ChevronRight } from 'lucide-react';
 import './FormularioPromociones.css';
+<<<<<<< HEAD
+
+const usuario = { nombre: 'Selva Verde Resort', rol: 'Administrador', avatarUrl: '' };
+=======
 import { useNuevaPromocionViewModel } from '../viewmodels/useNuevaPromocionViewModel';
 import { logout } from '../../../../../core/shared/utils/auth';
+>>>>>>> origin/richie
 
-export function NuevaPromocionPage() {
+export function FormularioPromociones() {
   const navigate = useNavigate();
   const {
     titulo, setTitulo,
