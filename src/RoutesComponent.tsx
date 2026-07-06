@@ -1,9 +1,11 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+// RoutesComponent.tsx
+import { Routes, Route } from 'react-router-dom';
 import LoginPage from './features/Auth/presentation/pages/Login/Login';
 import RegisterPage from './features/Auth/presentation/pages/Register/Register';
 import { NegocioHomePage } from './features/NegocioTuristico/Home/presentation/pages/NegocioHomePage';
 import { PromocionesPage } from './features/NegocioTuristico/Promociones/presentation/pages/PromocionesPage';
-
+import { Eventos } from './features/SistemaAdministrador/Eventos/presentation/pages/Eventos';
+import { HomeEventos } from './features/SistemaAdministrador/Eventos/presentation/pages/HomeEventos';
 
 const RoutesComponent = () => {
   return (
@@ -14,7 +16,9 @@ const RoutesComponent = () => {
 
       <Route path="/negocio/inicio" element={<NegocioHomePage />} />
       <Route path="/negocio/promociones" element={<PromocionesPage />} />
-      
+
+      <Route path="/administrador/eventos" element={<HomeEventos />} />
+      <Route path="/administrador/eventos/nuevo" element={<Eventos />} />
     </Routes>
   );
 };
