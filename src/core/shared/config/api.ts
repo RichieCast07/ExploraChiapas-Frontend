@@ -1,7 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-if (!API_BASE_URL) {
-  throw new Error('Falta configurar VITE_API_BASE_URL');
+if (!apiBaseUrl) {
+  throw new Error(
+    "Falta configurar VITE_API_BASE_URL en .env.local no sea bruto"
+  );
 }
 
-export const BASE_URL = API_BASE_URL;
+export const BASE_URL = apiBaseUrl;
