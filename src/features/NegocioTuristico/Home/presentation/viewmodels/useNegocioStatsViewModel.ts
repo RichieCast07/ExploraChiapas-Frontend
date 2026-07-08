@@ -7,6 +7,7 @@ interface NegocioStats {
   totalFavoritos: number;
   calificacionPromedio: number;
   totalResenas: number;
+  isVerified: boolean;
 }
 
 export function useNegocioStatsViewModel() {
@@ -35,6 +36,7 @@ export function useNegocioStatsViewModel() {
             totalFavoritos: statsBody.data.totalFavoritos,
             calificacionPromedio: statsBody.data.calificacionPromedio,
             totalResenas: statsBody.data.totalResenas,
+            isVerified: Boolean(negocio.isVerified),
           });
         } else {
           setError(statsBody.message ?? 'Error al cargar estadísticas');
