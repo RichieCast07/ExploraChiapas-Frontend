@@ -1,0 +1,270 @@
+/* features/NegocioTuristico/RegistroNegocio/presentation/pages/RegistroNegocioPage.css */
+
+* { box-sizing: border-box; }
+
+.registro-layout { display: flex; min-height: 100vh; }
+
+.registro-layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 260px;
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* Header */
+.registro-header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #f9faf8;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+.registro-header__brand { font-size: 20px; font-weight: 700; color: #15803d; }
+.registro-header__right { display: flex; align-items: center; gap: 16px; }
+.registro-header__bell { background: none; border: none; cursor: pointer; color: #4b5563; }
+.registro-header__divider { width: 1px; height: 28px; background: #e5e7eb; }
+.registro-header__user { display: flex; align-items: center; gap: 10px; }
+.registro-header__user-info { display: flex; flex-direction: column; align-items: flex-end; }
+.registro-header__user-name { font-size: 14px; font-weight: 600; color: #111827; }
+.registro-header__user-role { font-size: 12px; color: #9ca3af; }
+.registro-header__avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #15803d; color: #fff; display: flex;
+  align-items: center; justify-content: center; font-weight: 700;
+}
+
+/* Content */
+.registro-content { padding: 32px; flex: 1; overflow-y: auto; }
+.registro-title { font-size: 28px; color: #111827; margin-bottom: 6px; }
+.registro-subtitle { font-size: 14px; color: #6b7280; margin-bottom: 24px; }
+
+.registro-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.registro-col-left, .registro-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.registro-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.registro-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.registro-card input[type="text"],
+.registro-card input[type="number"],
+.registro-card input[type="time"] {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 14px;
+  outline: none;
+}
+.registro-card input:focus { border-color: #15803d; }
+
+/* Categoría */
+.categoria-options { display: flex; gap: 10px; }
+.categoria-chip {
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 14px;
+  background: #fff;
+  color: #374151;
+  cursor: pointer;
+}
+.categoria-chip.active {
+  border-color: #15803d;
+  background: #e6f4ea;
+  color: #15803d;
+  font-weight: 600;
+}
+
+/* Horario */
+.horario-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.horario-label { display: block; font-size: 11px; font-weight: 700; color: #9ca3af; margin-bottom: 6px; }
+
+/* Precio */
+.precio-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 14px;
+}
+.precio-input span { color: #6b7280; margin-right: 4px; }
+.precio-input input { border: none; padding: 12px 0; outline: none; width: 100%; }
+
+/* Servicios */
+.servicios-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.servicio-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f3f4f6;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: #374151;
+}
+.servicio-tag button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+}
+.btn-agregar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Mapa */
+.mapa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.btn-ajustar-pin {
+  background: none;
+  border: none;
+  color: #15803d;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+}
+
+.mapa-preview {
+  height: 220px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a8c99a 0%, #8fb87e 50%, #d9cfa8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.mapa-pin { color: #15803d; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+
+.mapa-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 10px;
+}
+.mapa-coords {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-top: 6px;
+  font-family: monospace;
+}
+
+/* Galería */
+.galeria-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 10px;
+  height: 180px;
+}
+.galeria-principal {
+  grid-row: span 2;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+.galeria-secundaria {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+}
+.galeria-hint { font-size: 12px; color: #9ca3af; margin-top: 10px; }
+
+/* Consejo */
+.consejo-card {
+  background: #e6f4ea;
+  border-radius: 12px;
+  padding: 18px;
+}
+.consejo-card__title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #15803d;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.consejo-card p { font-size: 13px; color: #374151; line-height: 1.5; }
+
+/* Submit */
+.registro-submit { grid-column: 1 / -1; margin-top: 8px; }
+.btn-continuar {
+  width: 100%;
+  background: #15803d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-continuar:hover { background: #166534; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .registro-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 1024px) {
+  .registro-layout__main { margin-left: 220px; }
+}
+@media (max-width: 768px) {
+  .registro-layout__main { margin-left: 0; }
+  .registro-header { padding: 0 20px 0 64px; }
+  .registro-content { padding: 20px; }
+}
