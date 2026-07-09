@@ -1,10 +1,16 @@
-// features/Auth/presentation/viewmodels/useLoginViewModel.ts
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { LoginUseCase } from "../../domain/LoginUseCase";
+import { AuthRepository } from "../../data/repository/AuthRepository";
+import {
+  clearSession,
+  saveSession,
+} from "../../../../core/shared/utils/auth";
 
 export function useLoginViewModel() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -12,22 +18,64 @@ export function useLoginViewModel() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Ingresa tu correo y contraseña");
+      return;
+    }
+
     setError(null);
     setIsLoading(true);
 
-    // Simula un pequeño delay, como si fuera una petición real
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      const loginUseCase = new LoginUseCase(
+        new AuthRepository()
+      );
 
-    setIsLoading(false);
+      const user = await loginUseCase.execute(
+        email,
+        password
+      );
 
-    // Por ahora, sin validar nada, solo redirige al Home
-    navigate('/admin/dashboard');
+      switch (user.userType) {
+        case "admin_plataforma":
+          saveSession(user);
+          navigate("/admin/dashboard", {
+            replace: true,
+          });
+          return;
+
+        case "admin_negocio":
+          saveSession(user);
+          navigate("/negocio/inicio", {
+            replace: true,
+          });
+          return;
+
+        default:
+          clearSession();
+          setError(
+            "Esta cuenta no tiene acceso al panel administrativo"
+          );
+      }
+    } catch (loginError) {
+      const message =
+        loginError instanceof Error
+          ? loginError.message
+          : "Error al iniciar sesión";
+
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return {
-    email, setEmail,
-    password, setPassword,
-    rememberMe, setRememberMe,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    rememberMe,
+    setRememberMe,
     isLoading,
     error,
     handleLogin,

@@ -1,42 +1,43 @@
-// features/NegocioTuristico/Promociones/presentation/pages/NuevaPromocionPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Megaphone, ImagePlus, ChevronRight } from 'lucide-react';
-import '../pages/FormularioPromociones.css';
-
-const usuario = { nombre: 'Selva Verde Resort', rol: 'Administrador', avatarUrl: '' };
+import './FormularioPromociones.css';
+import { useNuevaPromocionViewModel } from '../viewmodels/useNuevaPromocionViewModel';
+import { logout } from '../../../../../core/shared/utils/auth';
 
 export function NuevaPromocionPage() {
   const navigate = useNavigate();
+  const {
+    titulo, setTitulo,
+    precio, setPrecio,
+    descripcion, setDescripcion,
+    fechaInicio, setFechaInicio,
+    fechaFin, setFechaFin,
+    isLoading,
+    error,
+    publicar,
+  } = useNuevaPromocionViewModel();
 
-  const [titulo, setTitulo] = useState('');
-  const [descuento, setDescuento] = useState('');
-  const [descripcion, setDescripcion] = useState('');
-  const [fechaInicio, setFechaInicio] = useState('');
-  const [fechaFin, setFechaFin] = useState('');
-  const [imagen, setImagen] = useState<File | null>(null);
+  const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
+
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImagen(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
+    if (file) setPreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Por ahora solo mock: mostramos los datos y regresamos a la lista
-    console.log({ titulo, descuento, descripcion, fechaInicio, fechaFin, imagen });
-    navigate('/negocio/promociones');
+    const ok = await publicar();
+    if (ok) navigate('/negocio/promociones');
   };
 
   return (
     <div className="nueva-promo-layout">
-      <Sidebar config={negocioNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={negocioNavConfig} onLogout={logout} />
 
       <div className="nueva-promo-layout__main">
         {/* Header */}
@@ -49,10 +50,10 @@ export function NuevaPromocionPage() {
             <div className="nueva-promo-header__divider" />
             <div className="nueva-promo-header__user">
               <div className="nueva-promo-header__user-info">
-                <span className="nueva-promo-header__user-name">{usuario.nombre}</span>
-                <span className="nueva-promo-header__user-role">{usuario.rol}</span>
+                <span className="nueva-promo-header__user-name">{userName}</span>
+                <span className="nueva-promo-header__user-role">Administrador</span>
               </div>
-              <div className="nueva-promo-header__avatar">{usuario.nombre.charAt(0)}</div>
+              <div className="nueva-promo-header__avatar">{userName.charAt(0)}</div>
             </div>
           </div>
         </header>
@@ -70,6 +71,8 @@ export function NuevaPromocionPage() {
             Crea ofertas atractivas para atraer a más exploradores a tus tours y actividades.
           </p>
 
+          {error && <p style={{ color: 'red', padding: '0 1.5rem' }}>{error}</p>}
+
           <form className="nueva-promo-card" onSubmit={handleSubmit}>
             <div className="nueva-promo-card__header">
               <Megaphone size={16} />
@@ -85,18 +88,19 @@ export function NuevaPromocionPage() {
                     placeholder="Ej: Especial de Verano en Cañón del Sumidero"
                     value={titulo}
                     onChange={(e) => setTitulo(e.target.value)}
+                    required
                   />
                 </div>
                 <div className="form-group form-group--small">
-                  <label>Porcentaje de Descuento</label>
+                  <label>Precio (MXN)</label>
                   <div className="input-suffix">
                     <input
                       type="number"
-                      placeholder="15"
-                      value={descuento}
-                      onChange={(e) => setDescuento(e.target.value)}
+                      placeholder="500"
+                      value={precio}
+                      onChange={(e) => setPrecio(e.target.value)}
                     />
-                    <span>%</span>
+                    <span>$</span>
                   </div>
                 </div>
               </div>
@@ -153,8 +157,8 @@ export function NuevaPromocionPage() {
               <button type="button" className="btn-cancel" onClick={() => navigate('/negocio/promociones')}>
                 Cancelar
               </button>
-              <button type="submit" className="btn-publish">
-                Publicar Promoción
+              <button type="submit" className="btn-publish" disabled={isLoading}>
+                {isLoading ? 'Publicando...' : 'Publicar Promoción'}
               </button>
             </div>
           </form>
