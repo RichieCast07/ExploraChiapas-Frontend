@@ -1,15 +1,31 @@
+import { useState } from 'react';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
-import { Bell, Heart, MessageSquare, Star } from 'lucide-react';
+import { Bell, Heart, MessageSquare, Star, ShieldCheck, BadgeCheck } from 'lucide-react';
 import './NegocioHomePage.css';
 import { useNegocioStatsViewModel } from '../viewmodels/useNegocioStatsViewModel';
-import { logout } from '../../../../../core/shared/utils/auth';
+import { logout, fetchAuth } from '../../../../../core/shared/utils/auth';
+import { BASE_URL } from '../../../../../core/shared/config/api';
 
 export function NegocioHomePage() {
   const { stats, isLoading, error } = useNegocioStatsViewModel();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
 
   const val = (n: number | undefined) => isLoading ? '...' : (n?.toLocaleString() ?? '0');
+
+  async function handleSuscribirse() {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetchAuth(`${BASE_URL}/payments/checkout`, { method: 'POST' });
+      const body = await res.json();
+      if (body.success && body.url) {
+        window.location.href = body.url;
+      }
+    } finally {
+      setCheckoutLoading(false);
+    }
+  }
 
   return (
     <div className="negocio-layout">
@@ -38,6 +54,30 @@ export function NegocioHomePage() {
 
         <main className="negocio-content">
           {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
+
+          {!isLoading && stats && (
+            stats.isVerified ? (
+              <div className="negocio-verified-banner negocio-verified-banner--active">
+                <BadgeCheck size={20} />
+                <span>Negocio verificado</span>
+              </div>
+            ) : (
+              <div className="negocio-verified-banner">
+                <ShieldCheck size={20} />
+                <div className="negocio-verified-banner__text">
+                  <strong>Verifica tu negocio</strong>
+                  <span>Suscríbete por $99 MXN/mes y obtén la insignia de negocio verificado</span>
+                </div>
+                <button
+                  className="negocio-verified-banner__btn"
+                  onClick={handleSuscribirse}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? 'Cargando...' : 'Suscribirse'}
+                </button>
+              </div>
+            )
+          )}
 
           <div className="negocio-stats-grid">
             <div className="negocio-stat-card">

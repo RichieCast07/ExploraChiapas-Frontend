@@ -35,6 +35,7 @@ interface NegocioStats {
   totalFavoritos: number;
   calificacionPromedio: number;
   totalResenas: number;
+  isVerified: boolean;
 }
 
 export function useNegocioStatsViewModel() {
@@ -79,15 +80,16 @@ export function useNegocioStatsViewModel() {
         const statsBody =
           (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
 
-        if (
-          !statsResponse.ok ||
-          !statsBody.success ||
-          !statsBody.data
-        ) {
-          throw new Error(
-            statsBody.message ??
-              'No se pudieron cargar las estadísticas',
-          );
+        if (statsBody.success) {
+          setStats({
+            negocioNombre: negocio.name,
+            totalFavoritos: statsBody.data.totalFavoritos,
+            calificacionPromedio: statsBody.data.calificacionPromedio,
+            totalResenas: statsBody.data.totalResenas,
+            isVerified: Boolean(negocio.isVerified),
+          });
+        } else {
+          setError(statsBody.message ?? 'Error al cargar estadísticas');
         }
 
         setStats({

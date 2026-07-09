@@ -102,19 +102,8 @@ const accionesRapidas = [
 ];
 
 export function AdminHomePage() {
-  const {
-    stats,
-    isLoading,
-    error,
-    recargar,
-  } = useAdminStatsViewModel();
-
+  const { stats, isLoading } = useAdminStatsViewModel();
   const userName = localStorage.getItem('user_name') ?? 'Admin';
-
-  const formatValue = (value: number | undefined) => {
-    if (isLoading) {
-      return '...';
-    }
 
     return value?.toLocaleString('es-MX') ?? '0';
   };
@@ -213,17 +202,10 @@ export function AdminHomePage() {
 
             <div className="admin-header__user">
               <div className="admin-header__user-info">
-                <span className="admin-header__user-name">
-                  {userName}
-                </span>
-                <span className="admin-header__user-role">
-                  SUPER ADMINISTRADOR
-                </span>
+                <span className="admin-header__user-name">{userName}</span>
+                <span className="admin-header__user-role">SUPER ADMINISTRADOR</span>
               </div>
-
-              <div className="admin-header__avatar">
-                {userName.charAt(0).toUpperCase()}
-              </div>
+              <div className="admin-header__avatar">{userName.charAt(0).toUpperCase()}</div>
             </div>
           </div>
         </header>
