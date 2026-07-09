@@ -1,6 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+
 import { BASE_URL } from '../../../../../core/shared/config/api';
 import { fetchAuth } from '../../../../../core/shared/utils/auth';
+
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
+
+interface Negocio {
+  id: string;
+  name: string;
+  description: string | null;
+  businessTypeId: string;
+  locationId: string;
+  priceFrom: number | null;
+  isVerified: boolean;
+  active: boolean;
+  createdAt: string;
+  averageRating: number;
+  totalReviews: number;
+}
+
+interface ApiNegocioStats {
+  negocioId: string;
+  totalFavoritos: number;
+  calificacionPromedio: number;
+  totalResenas: number;
+}
 
 interface NegocioStats {
   negocioNombre: string;
@@ -15,34 +43,77 @@ export function useNegocioStatsViewModel() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAuth(`${BASE_URL}/businesses/mine`)
-      .then(res => res.json())
-      .then(async body => {
-        if (!body.success || !body.data?.length) {
+    const cargarEstadisticas = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const negociosResponse = await fetchAuth(
+          `${BASE_URL}/businesses/mine`,
+        );
+
+        const negociosBody =
+          (await negociosResponse.json()) as ApiResponse<Negocio[]>;
+
+        if (
+          !negociosResponse.ok ||
+          !negociosBody.success
+        ) {
+          throw new Error(
+            negociosBody.message ??
+              'No se pudieron cargar tus negocios',
+          );
+        }
+
+        const negocio = negociosBody.data?.[0];
+
+        if (!negocio) {
           setError('No tienes negocios registrados');
-          setIsLoading(false);
           return;
         }
 
-        const negocio = body.data[0];
+        const statsResponse = await fetchAuth(
+          `${BASE_URL}/stats/businesses/${negocio.id}`,
+        );
 
-        const statsRes = await fetchAuth(`${BASE_URL}/stats/businesses/${negocio.id}`);
-        const statsBody = await statsRes.json();
+        const statsBody =
+          (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
 
-        if (statsBody.success) {
-          setStats({
-            negocioNombre: negocio.name,
-            totalFavoritos: statsBody.data.totalFavoritos,
-            calificacionPromedio: statsBody.data.calificacionPromedio,
-            totalResenas: statsBody.data.totalResenas,
-          });
-        } else {
-          setError(statsBody.message ?? 'Error al cargar estadísticas');
+        if (
+          !statsResponse.ok ||
+          !statsBody.success ||
+          !statsBody.data
+        ) {
+          throw new Error(
+            statsBody.message ??
+              'No se pudieron cargar las estadísticas',
+          );
         }
-      })
-      .catch(() => setError('Error de conexión'))
-      .finally(() => setIsLoading(false));
+
+        setStats({
+          negocioNombre: negocio.name,
+          totalFavoritos: statsBody.data.totalFavoritos,
+          calificacionPromedio:
+            statsBody.data.calificacionPromedio,
+          totalResenas: statsBody.data.totalResenas,
+        });
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : 'Error de conexión con el servidor',
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void cargarEstadisticas();
   }, []);
 
-  return { stats, isLoading, error };
+  return {
+    stats,
+    isLoading,
+    error,
+  };
 }
