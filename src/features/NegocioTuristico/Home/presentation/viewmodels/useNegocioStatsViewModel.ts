@@ -1,119 +1,95 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { BASE_URL } from '../../../../../core/shared/config/api';
-import { fetchAuth } from '../../../../../core/shared/utils/auth';
+import { apiRequest } from '../../../../../core/shared/api/apiClient';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-}
-
-interface Negocio {
+interface Business {
   id: string;
   name: string;
-  description: string | null;
-  businessTypeId: string;
-  locationId: string;
-  priceFrom: number | null;
-  isVerified: boolean;
-  active: boolean;
-  createdAt: string;
-  averageRating: number;
-  totalReviews: number;
 }
 
-interface ApiNegocioStats {
+interface BusinessStatsApi {
   negocioId: string;
   totalFavoritos: number;
   calificacionPromedio: number;
   totalResenas: number;
+  visualizaciones: number;
+  clicsReserva: number;
+  vecesEnRutas: number;
 }
 
-interface NegocioStats {
+interface Promotion {
+  id: string;
+  activo: boolean;
+  fechaInicio: string;
+  fechaFin: string | null;
+}
+
+export interface RecentBusinessReview {
+  id: string;
+  userName: string;
+  rating: number;
+  comment: string | null;
+  response: string | null;
+  createdAt: string;
+}
+
+export interface NegocioStats extends BusinessStatsApi {
   negocioNombre: string;
-  totalFavoritos: number;
-  calificacionPromedio: number;
-  totalResenas: number;
+  promocionesActivas: number;
+}
+
+function isActivePromotion(promotion: Promotion): boolean {
+  if (!promotion.activo) return false;
+  const now = new Date();
+  const start = new Date(`${promotion.fechaInicio}T00:00:00`);
+  const end = promotion.fechaFin ? new Date(`${promotion.fechaFin}T23:59:59`) : null;
+  return start <= now && (!end || end >= now);
 }
 
 export function useNegocioStatsViewModel() {
   const [stats, setStats] = useState<NegocioStats | null>(null);
+  const [recentReviews, setRecentReviews] = useState<RecentBusinessReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const cargarEstadisticas = async () => {
-      setIsLoading(true);
-      setError(null);
+  const load = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const negociosResponse = await fetchAuth(
-          `${BASE_URL}/businesses/mine`,
-        );
-
-        const negociosBody =
-          (await negociosResponse.json()) as ApiResponse<Negocio[]>;
-
-        if (
-          !negociosResponse.ok ||
-          !negociosBody.success
-        ) {
-          throw new Error(
-            negociosBody.message ??
-              'No se pudieron cargar tus negocios',
-          );
-        }
-
-        const negocio = negociosBody.data?.[0];
-
-        if (!negocio) {
-          setError('No tienes negocios registrados');
-          return;
-        }
-
-        const statsResponse = await fetchAuth(
-          `${BASE_URL}/stats/businesses/${negocio.id}`,
-        );
-
-        const statsBody =
-          (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
-
-        if (
-          !statsResponse.ok ||
-          !statsBody.success ||
-          !statsBody.data
-        ) {
-          throw new Error(
-            statsBody.message ??
-              'No se pudieron cargar las estadísticas',
-          );
-        }
-
-        setStats({
-          negocioNombre: negocio.name,
-          totalFavoritos: statsBody.data.totalFavoritos,
-          calificacionPromedio:
-            statsBody.data.calificacionPromedio,
-          totalResenas: statsBody.data.totalResenas,
-        });
-      } catch (requestError) {
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : 'Error de conexión con el servidor',
-        );
-      } finally {
-        setIsLoading(false);
+    try {
+      const businesses = await apiRequest<Business[]>('/businesses/mine');
+      const business = businesses[0];
+      if (!business) {
+        setStats(null);
+        setRecentReviews([]);
+        setError('No tienes negocios registrados');
+        return;
       }
-    };
 
-    void cargarEstadisticas();
+      const [businessStats, promotions, reviews] = await Promise.all([
+        apiRequest<BusinessStatsApi>(`/stats/businesses/${business.id}`),
+        apiRequest<Promotion[]>(`/promotions?negocioId=${encodeURIComponent(business.id)}`, {}, false),
+        apiRequest<RecentBusinessReview[]>(`/reviews/business/${business.id}`),
+      ]);
+
+      setStats({
+        ...businessStats,
+        negocioNombre: business.name,
+        promocionesActivas: promotions.filter(isActivePromotion).length,
+      });
+      setRecentReviews(reviews.slice(0, 3));
+    } catch (requestError) {
+      setStats(null);
+      setRecentReviews([]);
+      setError(requestError instanceof Error ? requestError.message : 'Error de conexión con el servidor');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return {
-    stats,
-    isLoading,
-    error,
-  };
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { stats, recentReviews, isLoading, error, reload: load };
 }

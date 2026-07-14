@@ -1,175 +1,68 @@
-// features/SistemaAdministrador/Eventos/presentation/pages/HomeEventos.tsx
-import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
-import { Search, Bell, Plus, List, LayoutGrid, Calendar, ChevronDown, Pencil, Trash2, BarChart2 } from 'lucide-react';
+import { CalendarDays, CalendarRange, Grid2X2, List, PlusCircle, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+
+import { apiRequest, apiVoid } from '../../../../../core/shared/api/apiClient';
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
 import './HomeEventos.css';
 
-const usuario = { nombre: 'Admin Explora', rol: 'SUPER ADMINISTRADOR' };
-
-// ---- Datos ficticios (mock) ----
-const eventos = [
-  {
-    id: '1',
-    nombre: 'Fiesta Grande de Enero',
-    descripcion: 'Tradición milenaria de los...',
-    municipio: 'Chiapa de Corzo',
-    fechaHora: '15 Ene, 2024 - 10:00 AM',
-    estado: 'publicado' as const,
-    imagen: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=200',
-  },
-  {
-    id: '2',
-    nombre: 'Eco-Tour Selva Lacandona',
-    descripcion: 'Exploración profunda en...',
-    municipio: 'Ocosingo',
-    fechaHora: '22 Feb, 2024 - 07:00 AM',
-    estado: 'borrador' as const,
-    imagen: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200',
-  },
-  {
-    id: '3',
-    nombre: 'Taller de Telares Mayas',
-    descripcion: 'Aprende la técnica...',
-    municipio: 'San Cristóbal',
-    fechaHora: '05 Dic, 2023 - 11:00 AM',
-    estado: 'finalizado' as const,
-    imagen: 'https://images.unsplash.com/photo-1528650301516-3d9dbd11f4a5?w=200',
-  },
-];
-
-const estadoLabel: Record<string, string> = {
-  publicado: 'Publicado',
-  borrador: 'Borrador',
-  finalizado: 'Finalizado',
-};
+interface EventItem {
+  id: string;
+  titulo: string;
+  descripcion: string | null;
+  fechaInicio: string;
+  fechaFin: string | null;
+  categoriaNombre: string | null;
+  municipio: string | null;
+  activo: boolean;
+}
 
 export function HomeEventos() {
-  const navigate = useNavigate();
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [search, setSearch] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      setEvents(await apiRequest<EventItem[]>('/events', {}, false));
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'No se pudieron cargar los eventos');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => { void load(); }, []);
+
+  const filtered = useMemo(() => events.filter((event) => (
+    `${event.titulo} ${event.descripcion ?? ''} ${event.municipio ?? ''} ${event.categoriaNombre ?? ''}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  )), [events, search]);
+
+  const remove = async (event: EventItem) => {
+    if (!window.confirm(`¿Eliminar el evento “${event.titulo}”?`)) return;
+    try {
+      await apiVoid(`/events/${event.id}`, { method: 'DELETE' });
+      await load();
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : 'No se pudo eliminar el evento');
+    }
+  };
 
   return (
-    <div className="gestion-eventos-layout">
-      <Sidebar config={adminNavConfig} onLogout={() => console.log('logout')} />
+    <PanelShell kind="admin">
+      <div className="ec-page admin-events-page">
+        <div className="ec-page-header"><div className="ec-page-header__copy"><div className="ec-breadcrumb">Inicio <span>›</span> Eventos</div><h1 className="ec-page-title">Gestión de Eventos Turísticos</h1></div><Link className="ec-button ec-button--primary" to="/admin/eventos/nuevo"><PlusCircle size={17} /> Crear Evento</Link></div>
+        {error && <div className="ec-note" style={{ borderColor: '#ef4444', color: '#991b1b' }}>{error}</div>}
 
-      <div className="gestion-eventos-layout__main">
-        {/* Header */}
-        <header className="ge-header">
-          <div className="ge-header__search">
-            <Search size={18} color="#9ca3af" />
-            <input type="text" placeholder="Buscar destinos, negocios o usuarios..." />
-          </div>
-          <div className="ge-header__right">
-            <button className="ge-header__bell">
-              <Bell size={20} />
-            </button>
-            <div className="ge-header__user">
-              <div className="ge-header__user-info">
-                <span className="ge-header__user-name">{usuario.nombre}</span>
-                <span className="ge-header__user-role">{usuario.rol}</span>
-              </div>
-              <div className="ge-header__avatar">{usuario.nombre.charAt(0)}</div>
-            </div>
-          </div>
-        </header>
+        <section className="ec-card admin-events-filters"><div className="admin-events-filter-row"><input className="ec-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar evento, municipio o categoría" /><button className="ec-button" type="button" onClick={() => void load()}><CalendarRange size={16} /> Actualizar</button></div><div className="admin-events-view-switch"><button className="active" type="button"><List size={15} /> Vista Tabla</button><button type="button" disabled><Grid2X2 size={15} /> Vista Tarjetas</button><button type="button" disabled><CalendarDays size={15} /> Calendario</button></div></section>
 
-        {/* Contenido */}
-        <main className="ge-content">
-          <div className="ge-breadcrumb">
-            <span>Inicio</span>
-            <span className="ge-breadcrumb__sep">›</span>
-            <span className="active">Eventos</span>
-          </div>
-
-          <div className="ge-title-row">
-            <h1>Gestión de Eventos Turísticos</h1>
-            <button className="btn-crear-evento" onClick={() => navigate('/administrador/eventos/nuevo')}>
-              <Plus size={18} /> Crear Evento
-            </button>
-          </div>
-
-          {/* Filtros */}
-          <div className="ge-filters-card">
-            <div className="ge-filters-row">
-              <button className="filter-select">
-                Todos los Municipios <ChevronDown size={14} />
-              </button>
-              <button className="filter-select">
-                <Calendar size={14} /> Fecha: Rango de fechas
-              </button>
-              <button className="filter-select">
-                Categoría: Todas <ChevronDown size={14} />
-              </button>
-            </div>
-
-            <div className="ge-view-toggle">
-              <button className="view-btn view-btn--active">
-                <List size={15} /> Vista Tabla
-              </button>
-              <button className="view-btn">
-                <LayoutGrid size={15} /> Vista Tarjetas
-              </button>
-              <button className="view-btn">
-                <Calendar size={15} /> Calendario
-              </button>
-            </div>
-          </div>
-
-          {/* Tabla */}
-          <div className="ge-table-card">
-            <table className="ge-table">
-              <thead>
-                <tr>
-                  <th>Evento</th>
-                  <th>Municipio</th>
-                  <th>Fecha &amp; Hora</th>
-                  <th>Estado</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {eventos.map((evento) => (
-                  <tr key={evento.id}>
-                    <td>
-                      <div className="ge-evento-cell">
-                        <img src={evento.imagen} alt={evento.nombre} className="ge-evento-thumb" />
-                        <div>
-                          <span className="ge-evento-nombre">{evento.nombre}</span>
-                          <span className="ge-evento-desc">{evento.descripcion}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{evento.municipio}</td>
-                    <td>{evento.fechaHora}</td>
-                    <td>
-                      <span className={`ge-badge ge-badge--${evento.estado}`}>
-                        {estadoLabel[evento.estado]}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="ge-actions">
-                        {evento.estado === 'finalizado' ? (
-                          <button className="icon-btn">
-                            <BarChart2 size={16} />
-                          </button>
-                        ) : (
-                          <>
-                            <button className="icon-btn" onClick={() => navigate(`/administrador/eventos/editar/${evento.id}`)}>
-                              <Pencil size={16} />
-                            </button>
-                            <button className="icon-btn icon-btn--danger">
-                              <Trash2 size={16} />
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
+        <section className="ec-card"><div className="ec-table-wrap"><table className="ec-table admin-events-table"><thead><tr><th>Evento</th><th>Categoría</th><th>Municipio</th><th>Fecha y hora</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>{filtered.map((event) => <tr key={event.id}><td><div className="ec-identity"><span className="admin-event-thumb">🎉</span><div><strong>{event.titulo}</strong><small>{event.descripcion ?? 'Sin descripción'}</small></div></div></td><td>{event.categoriaNombre ?? 'Sin categoría'}</td><td>{event.municipio ?? 'Sin municipio'}</td><td>{new Date(event.fechaInicio).toLocaleString('es-MX')}</td><td><span className="ec-badge ec-badge--green">Publicado</span></td><td><div className="admin-event-actions"><button type="button" className="danger" title="Eliminar" onClick={() => void remove(event)}><Trash2 size={15} /></button></div></td></tr>)}</tbody></table></div>{isLoading && <div className="ec-note">Cargando eventos...</div>}{!isLoading && filtered.length === 0 && <div className="ec-note">No hay eventos registrados.</div>}</section>
       </div>
-    </div>
+    </PanelShell>
   );
 }

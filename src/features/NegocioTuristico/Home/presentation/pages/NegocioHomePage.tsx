@@ -1,97 +1,55 @@
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
-import { Bell, Heart, MessageSquare, Star } from 'lucide-react';
-import './NegocioHomePage.css';
+import { Eye, LayoutDashboard, Plus, Route, Star, Tag } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
 import { useNegocioStatsViewModel } from '../viewmodels/useNegocioStatsViewModel';
-import { logout } from '../../../../../core/shared/utils/auth';
+import './NegocioHomePage.css';
+
+function relativeDate(dateValue: string): string {
+  const date = new Date(dateValue);
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+  if (minutes < 1) return 'Ahora';
+  if (minutes < 60) return `Hace ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+  return date.toLocaleDateString('es-MX');
+}
 
 export function NegocioHomePage() {
-  const { stats, isLoading, error } = useNegocioStatsViewModel();
-  const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
-
-  const val = (n: number | undefined) => isLoading ? '...' : (n?.toLocaleString() ?? '0');
+  const { stats, recentReviews, isLoading, error, reload } = useNegocioStatsViewModel();
 
   return (
-    <div className="negocio-layout">
-      <Sidebar config={negocioNavConfig} onLogout={logout} />
+    <PanelShell kind="business">
+      <div className="ec-page business-home-page">
+        <div className="business-home-actions"><button className="ec-button" type="button" onClick={() => void reload()} disabled={isLoading}>Actualizar</button><Link className="ec-button ec-button--primary" to="/negocio/promociones/nueva"><Plus size={16}/> Nueva promoción</Link></div>
+        {error && <div className="ec-alert">{error}</div>}
 
-      <div className="negocio-layout__main">
-        <header className="negocio-header">
-          <h1 className="negocio-header__brand">ExploraChiapas</h1>
+        <section className="ec-stat-grid ec-stat-grid--3 business-home-stats">
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Eye size={18}/></span><span className="ec-stat-card__trend">Acumulado</span></div><div><div className="ec-stat-card__label">Visualizaciones</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.visualizaciones ?? 0).toLocaleString('es-MX')}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><Star size={18}/></span><span className="ec-badge">{stats?.totalResenas ?? 0} reseñas</span></div><div><div className="ec-stat-card__label">Calificación promedio</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.calificacionPromedio ?? 0).toFixed(1)} <small>/5.0</small></div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Tag size={18}/></span><Link className="business-stat-link" to="/negocio/promociones">Ver todas</Link></div><div><div className="ec-stat-card__label">Promociones activas</div><div className="ec-stat-card__value">{isLoading ? '…' : stats?.promocionesActivas ?? 0}</div></div></article>
+        </section>
 
-          <div className="negocio-header__right">
-            <button className="negocio-header__bell">
-              <Bell size={20} />
-            </button>
-            <div className="negocio-header__divider" />
-            <div className="negocio-header__user">
-              <div className="negocio-header__user-info">
-                <span className="negocio-header__user-name">{stats?.negocioNombre ?? userName}</span>
-                <span className="negocio-header__user-role">Administrador</span>
-              </div>
-              <div className="negocio-header__avatar negocio-header__avatar--placeholder">
-                {(stats?.negocioNombre ?? userName).charAt(0)}
-              </div>
-            </div>
+        <section className="ec-stat-grid ec-stat-grid--3 business-home-stats">
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Route size={18}/></span></div><div><div className="ec-stat-card__label">Incluido en rutas</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.vecesEnRutas ?? 0).toLocaleString('es-MX')}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><Eye size={18}/></span></div><div><div className="ec-stat-card__label">Clics en reservar</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.clicsReserva ?? 0).toLocaleString('es-MX')}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Star size={18}/></span></div><div><div className="ec-stat-card__label">Favoritos</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.totalFavoritos ?? 0).toLocaleString('es-MX')}</div></div></article>
+        </section>
+
+        <section className="business-shortcuts">
+          <Link to="/negocio/dashboard" className="business-shortcut"><span><LayoutDashboard size={20}/></span><h2>Dashboard</h2><p>Consulta tráfico, interacción y conversión.</p></Link>
+          <Link to="/negocio/promociones" className="business-shortcut"><span><Tag size={20}/></span><h2>Promociones</h2><p>Crea y gestiona tus ofertas especiales.</p></Link>
+          <Link to="/negocio/resenas" className="business-shortcut"><span><Star size={20}/></span><h2>Reseñas</h2><p>Responde a tus clientes y mejora tu reputación.</p></Link>
+        </section>
+
+        <section className="ec-card business-activity-card">
+          <div className="ec-card__header"><h2>Reseñas recientes</h2><Link className="ec-button ec-button--ghost ec-button--sm" to="/negocio/resenas">Ver todas ›</Link></div>
+          <div className="business-activity-list">
+            {recentReviews.map((item)=><article key={item.id}><span className="ec-avatar">{item.userName.charAt(0).toUpperCase()}</span><div><div className="business-activity-top"><strong>{item.userName}</strong><small>{relativeDate(item.createdAt)}</small></div><span className="business-stars">{'★'.repeat(item.rating)}{'☆'.repeat(5-item.rating)}</span><p>“{item.comment || 'Sin comentario'}”</p>{item.response && <small>Respuesta enviada: {item.response}</small>}</div></article>)}
           </div>
-        </header>
-
-        <main className="negocio-content">
-          {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
-
-          <div className="negocio-stats-grid">
-            <div className="negocio-stat-card">
-              <div className="negocio-stat-card__top">
-                <span className="negocio-stat-card__label">Favoritos del Negocio</span>
-                <div className="negocio-stat-card__icon icon--green">
-                  <Heart size={18} />
-                </div>
-              </div>
-              <div className="negocio-stat-card__value-row">
-                <span className="negocio-stat-card__value">{val(stats?.totalFavoritos)}</span>
-              </div>
-              <p className="negocio-stat-card__footer">usuarios lo han marcado como favorito</p>
-            </div>
-
-            <div className="negocio-stat-card">
-              <div className="negocio-stat-card__top">
-                <span className="negocio-stat-card__label">Total de Reseñas</span>
-                <div className="negocio-stat-card__icon icon--blue">
-                  <MessageSquare size={18} />
-                </div>
-              </div>
-              <div className="negocio-stat-card__value-row">
-                <span className="negocio-stat-card__value">{val(stats?.totalResenas)}</span>
-              </div>
-              <p className="negocio-stat-card__footer">reseñas recibidas</p>
-            </div>
-
-            <div className="negocio-stat-card">
-              <div className="negocio-stat-card__top">
-                <span className="negocio-stat-card__label">Calificación Promedio</span>
-                <div className="negocio-stat-card__icon icon--yellow">
-                  <Star size={18} />
-                </div>
-              </div>
-              <div className="negocio-stat-card__value-row">
-                <span className="negocio-stat-card__value">
-                  {isLoading ? '...' : `${stats?.calificacionPromedio?.toFixed(1) ?? '0.0'}/5`}
-                </span>
-              </div>
-              <div className="negocio-stat-card__stars">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star
-                    key={i}
-                    size={16}
-                    fill={i < Math.round(stats?.calificacionPromedio ?? 0) ? '#f59e0b' : 'none'}
-                    color="#f59e0b"
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </main>
+          {!isLoading && recentReviews.length === 0 && <div className="ec-note">Todavía no hay reseñas para este negocio.</div>}
+        </section>
       </div>
-    </div>
+    </PanelShell>
   );
 }

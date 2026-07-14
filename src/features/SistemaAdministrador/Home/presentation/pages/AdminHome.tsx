@@ -1,481 +1,147 @@
 import {
   AlertTriangle,
-  ArrowUp,
-  Bell,
-  CalendarDays,
+  ArrowUpRight,
   CalendarPlus,
-  CheckCircle,
-  Heart,
-  MapPin,
+  CheckCircle2,
   MapPinPlus,
-  MessageSquareText,
-  MoreVertical,
-  Route,
-  Search,
   Store,
-  UserCheck,
   Users,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
+  YAxis,
 } from 'recharts';
 
-import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { logout } from '../../../../../core/shared/utils/auth';
-import { useAdminStatsViewModel } from '../viewmodels/useAdminStatsViewModel';
-
+import { apiRequest } from '../../../../../core/shared/api/apiClient';
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import { useAdminAnalyticsViewModel } from '../../../Analitica/presentation/viewmodels/useAdminAnalyticsViewModel';
 import './AdminHome.css';
 
-const usuariosPorMes = [
-  { mes: 'ENE', actual: 12000, anterior: 9000 },
-  { mes: 'FEB', actual: 14500, anterior: 10500 },
-  { mes: 'MAR', actual: 17800, anterior: 12000 },
-  { mes: 'ABR', actual: 21000, anterior: 13500 },
-  { mes: 'MAY', actual: 18500, anterior: 15000 },
-  { mes: 'JUN', actual: 19800, anterior: 16200 },
-];
+interface PendingBusiness {
+  id: string;
+  name: string;
+  businessTypeName: string;
+  requestStatus: string;
+  createdAt: string;
+}
 
-const destinosMasVisitados = [
-  {
-    nombre: 'Cañón del Sumidero',
-    visitas: '12.5k',
-    porcentaje: 100,
-  },
-  {
-    nombre: 'Palenque',
-    visitas: '10.2k',
-    porcentaje: 82,
-  },
-  {
-    nombre: 'San Cristóbal de las Casas',
-    visitas: '9.8k',
-    porcentaje: 78,
-  },
-  {
-    nombre: 'Cascadas de Agua Azul',
-    visitas: '7.4k',
-    porcentaje: 59,
-  },
-];
+interface AlertItem {
+  id: string;
+  typeName: string;
+  description: string;
+  statusName: string;
+  generatedAt: string;
+}
 
-const actividadReciente = [
-  {
-    titulo: 'Hotel Selva Verde ha registrado un nuevo negocio.',
-    descripcion: 'Hace 15 minutos • Categoría: Alojamiento',
-    tipo: 'negocio' as const,
-    accionLabel: 'Revisar',
-  },
-  {
-    titulo: 'Usuario @carlos88 reportó un destino como "Inaccesible".',
-    descripcion: 'Hace 2 horas • Lagos de Montebello',
-    tipo: 'reporte' as const,
-    prioridadAlta: true,
-  },
-  {
-    titulo: 'Guía Maya Adventure ha sido verificado.',
-    descripcion: 'Hace 4 horas • Perfil profesional',
-    tipo: 'verificacion' as const,
-  },
-];
-
-const accionesRapidas = [
-  {
-    titulo: 'Registrar Destino',
-    descripcion: 'Añadir punto de interés',
-    icono: <MapPinPlus size={18} />,
-  },
-  {
-    titulo: 'Aprobar Negocio',
-    descripcion: 'Gestionar cola de espera',
-    icono: <UserCheck size={18} />,
-  },
-  {
-    titulo: 'Crear Evento',
-    descripcion: 'Promocionar cultura local',
-    icono: <CalendarPlus size={18} />,
-  },
-];
+function relativeDate(value: string): string {
+  const date = new Date(value);
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+  if (minutes < 1) return 'Ahora';
+  if (minutes < 60) return `Hace ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+  return date.toLocaleDateString('es-MX');
+}
 
 export function AdminHomePage() {
-  const {
-    stats,
-    isLoading,
-    error,
-    recargar,
-  } = useAdminStatsViewModel();
+  const { data, isLoading, error, reload } = useAdminAnalyticsViewModel();
+  const [pendingBusinesses, setPendingBusinesses] = useState<PendingBusiness[]>([]);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [activityError, setActivityError] = useState<string | null>(null);
 
-  const userName = localStorage.getItem('user_name') ?? 'Admin';
-
-  const formatValue = (value: number | undefined) => {
-    if (isLoading) {
-      return '...';
+  const loadActivity = async () => {
+    try {
+      const [businesses, alertData] = await Promise.all([
+        apiRequest<PendingBusiness[]>('/businesses/admin/requests?status=pendiente'),
+        apiRequest<AlertItem[]>('/alerts?statusName=pendiente&limit=10'),
+      ]);
+      setPendingBusinesses(businesses);
+      setAlerts(alertData);
+      setActivityError(null);
+    } catch (requestError) {
+      setActivityError(requestError instanceof Error ? requestError.message : 'No se pudo cargar la actividad reciente');
     }
-
-    return value?.toLocaleString('es-MX') ?? '0';
   };
 
-  const statsCards = [
-    {
-      label: 'USUARIOS REGISTRADOS',
-      value: stats?.totalUsuarios,
-      footer: 'usuarios registrados en la plataforma',
-      icon: <Users size={20} />,
-      iconClass: 'stats-card__icon--green',
-    },
-    {
-      label: 'NEGOCIOS TURÍSTICOS',
-      value: stats?.totalNegocios,
-      footer: 'negocios registrados',
-      icon: <Store size={20} />,
-      iconClass: 'stats-card__icon--orange',
-    },
-    {
-      label: 'DESTINOS TURÍSTICOS',
-      value: stats?.totalDestinos,
-      footer: 'destinos registrados',
-      icon: <MapPin size={20} />,
-      iconClass: 'stats-card__icon--blue',
-    },
-    {
-      label: 'NEGOCIOS VERIFICADOS',
-      value: stats?.negociosVerificados,
-      footer: 'negocios con verificación activa',
-      icon: <CheckCircle size={20} />,
-      iconClass: 'stats-card__icon--green',
-    },
-    {
-      label: 'EVENTOS',
-      value: stats?.totalEventos,
-      footer: 'eventos registrados',
-      icon: <CalendarDays size={20} />,
-      iconClass: 'stats-card__icon--orange',
-    },
-    {
-      label: 'RESEÑAS',
-      value: stats?.totalResenas,
-      footer: 'reseñas publicadas',
-      icon: <MessageSquareText size={20} />,
-      iconClass: 'stats-card__icon--blue',
-    },
-    {
-      label: 'RUTAS',
-      value: stats?.totalRutas,
-      footer: 'rutas creadas',
-      icon: <Route size={20} />,
-      iconClass: 'stats-card__icon--green',
-    },
-    {
-      label: 'FAVORITOS EN DESTINOS',
-      value: stats?.totalFavoritosDestinos,
-      footer: 'destinos guardados como favoritos',
-      icon: <Heart size={20} />,
-      iconClass: 'stats-card__icon--orange',
-    },
-    {
-      label: 'FAVORITOS EN NEGOCIOS',
-      value: stats?.totalFavoritosNegocios,
-      footer: 'negocios guardados como favoritos',
-      icon: <Heart size={20} />,
-      iconClass: 'stats-card__icon--blue',
-    },
-  ];
+  useEffect(() => {
+    void loadActivity();
+  }, []);
+
+  const refresh = async () => {
+    await Promise.all([reload(), loadActivity()]);
+  };
+
+  const summary = data?.summary;
+  const pendingReports = alerts.filter((alert) => alert.statusName === 'pendiente').length;
+  const maxVisits = Math.max(1, ...(data?.topDestinations.map((destination) => destination.visits) ?? [1]));
 
   return (
-    <div className="admin-layout">
-      <Sidebar
-        config={adminNavConfig}
-        onLogout={logout}
-      />
-
-      <div className="admin-layout__main">
-        <header className="admin-header">
-          <div className="admin-header__search">
-            <Search size={18} color="#9ca3af" />
-            <input
-              type="text"
-              placeholder="Buscar destinos, negocios o usuarios..."
-            />
+    <PanelShell kind="admin">
+      <div className="ec-page admin-dashboard-page">
+        <div className="ec-page-header">
+          <div className="ec-page-header__copy">
+            <h1 className="ec-page-title">Dashboard General</h1>
+            <p className="ec-page-subtitle">Resumen operativo obtenido directamente de la API de ExploraChiapas.</p>
           </div>
-
-          <div className="admin-header__right">
-            <button
-              type="button"
-              className="admin-header__bell"
-              aria-label="Ver notificaciones"
-            >
-              <Bell size={20} />
-            </button>
-
-            <div className="admin-header__user">
-              <div className="admin-header__user-info">
-                <span className="admin-header__user-name">
-                  {userName}
-                </span>
-                <span className="admin-header__user-role">
-                  SUPER ADMINISTRADOR
-                </span>
-              </div>
-
-              <div className="admin-header__avatar">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-            </div>
+          <div className="ec-actions">
+            <button className="ec-button" type="button" onClick={() => void refresh()} disabled={isLoading}>Actualizar datos</button>
+            <Link className="ec-button ec-button--primary" to="/admin/destinos"><MapPinPlus size={16} /> Nuevo destino</Link>
           </div>
-        </header>
+        </div>
 
-        <main className="admin-content">
-          <div className="admin-content__header">
-            <div>
-              <h1>Dashboard General</h1>
-              <p>
-                Bienvenido de nuevo. Aquí tienes el resumen general de
-                Explora Chiapas.
-              </p>
-            </div>
+        {(error || activityError) && <div className="ec-alert">{error ?? activityError}</div>}
 
-            <div className="admin-content__header-actions">
-              <button
-                type="button"
-                className="btn btn--outline"
-                onClick={() => void recargar()}
-                disabled={isLoading}
-              >
-                Actualizar datos
-              </button>
+        <section className="ec-stat-grid">
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Users size={18} /></span></div><div><div className="ec-stat-card__label">Usuarios activos</div><div className="ec-stat-card__value">{isLoading ? '…' : (summary?.totalUsuarios ?? 0).toLocaleString('es-MX')}</div><div className="ec-stat-card__hint">Cuentas activas en la plataforma</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><Store size={18} /></span></div><div><div className="ec-stat-card__label">Negocios turísticos</div><div className="ec-stat-card__value">{isLoading ? '…' : (summary?.totalNegocios ?? 0).toLocaleString('es-MX')}</div><div className="ec-stat-card__hint">{summary?.negociosVerificados ?? 0} verificados</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><MapPinPlus size={18} /></span></div><div><div className="ec-stat-card__label">Destinos turísticos</div><div className="ec-stat-card__value">{isLoading ? '…' : (summary?.totalDestinos ?? 0).toLocaleString('es-MX')}</div><div className="ec-stat-card__hint">{data?.categoryDistribution.length ?? 0} categorías con destinos</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--red"><AlertTriangle size={18} /></span>{pendingReports > 0 && <span className="ec-badge ec-badge--red">Pendiente</span>}</div><div><div className="ec-stat-card__label">Reportes pendientes</div><div className="ec-stat-card__value">{pendingReports}</div><div className="ec-stat-card__hint">Cargados desde moderación</div></div></article>
+        </section>
 
-              <button
-                type="button"
-                className="btn btn--primary"
-              >
-                + Nuevo listado
-              </button>
-            </div>
-          </div>
+        <section className="admin-dashboard-charts">
+          <article className="ec-card">
+            <div className="ec-card__header"><div><h2>Actividad por mes</h2><small>Últimos seis meses</small></div><div className="admin-chart-legend"><span><i className="legend-dot legend-dot--green" />Usuarios</span><span><i className="legend-dot" />Rutas</span></div></div>
+            <div className="admin-chart-area"><ResponsiveContainer width="100%" height={250}><LineChart data={data?.monthly ?? []} margin={{ top: 15, right: 15, left: -20, bottom: 0 }}><XAxis dataKey="month" axisLine={false} tickLine={false} fontSize={11} /><YAxis allowDecimals={false} /><Tooltip /><Line dataKey="routes" name="Rutas" type="monotone" stroke="#c88946" strokeDasharray="4 4" strokeWidth={2} dot={false} /><Line dataKey="users" name="Usuarios" type="monotone" stroke="#19813c" strokeWidth={3} dot={false} /></LineChart></ResponsiveContainer></div>
+          </article>
 
-          {error && (
-            <div className="admin-dashboard__error">
-              <span>{error}</span>
-
-              <button
-                type="button"
-                onClick={() => void recargar()}
-              >
-                Reintentar
-              </button>
-            </div>
-          )}
-
-          <div className="stats-grid">
-            {statsCards.map((card) => (
-              <div
-                key={card.label}
-                className="stats-card"
-              >
-                <div className="stats-card__top">
-                  <div
-                    className={`stats-card__icon ${card.iconClass}`}
-                  >
-                    {card.icon}
-                  </div>
-
-                  <span className="stats-card__change positive">
-                    <ArrowUp size={12} /> total
-                  </span>
-                </div>
-
-                <p className="stats-card__label">
-                  {card.label}
-                </p>
-                <p className="stats-card__value">
-                  {formatValue(card.value)}
-                </p>
-                <p className="stats-card__footer">
-                  {card.footer}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="mid-grid">
-            <div className="card">
-              <div className="card__header">
-                <div>
-                  <h3>Usuarios registrados por mes</h3>
-                  <small>Datos demostrativos</small>
-                </div>
-
-                <div className="chart-legend">
-                  <span>
-                    <i className="dot dot--green" /> Periodo actual
-                  </span>
-                  <span>
-                    <i className="dot dot--gray" /> Periodo anterior
-                  </span>
-                </div>
-              </div>
-
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={usuariosPorMes}>
-                  <XAxis
-                    dataKey="mes"
-                    tickLine={false}
-                    axisLine={false}
-                    fontSize={12}
-                    stroke="#9ca3af"
-                  />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="actual"
-                    stroke="#16a34a"
-                    strokeWidth={2}
-                    dot={false}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="anterior"
-                    stroke="#d1d5db"
-                    strokeWidth={2}
-                    strokeDasharray="4 4"
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="card">
-              <div className="card__header">
-                <div>
-                  <h3>Destinos más visitados</h3>
-                  <small>Datos demostrativos</small>
-                </div>
-                <MoreVertical size={18} color="#9ca3af" />
-              </div>
-
-              {destinosMasVisitados.map((destino) => (
-                <div
-                  key={destino.nombre}
-                  className="destino-item"
-                >
-                  <div className="destino-item__top">
-                    <span>{destino.nombre}</span>
-                    <span>{destino.visitas}</span>
-                  </div>
-
-                  <div className="destino-item__bar-bg">
-                    <div
-                      className="destino-item__bar-fill"
-                      style={{
-                        width: `${destino.porcentaje}%`,
-                      }}
-                    />
-                  </div>
-                </div>
+          <article className="ec-card">
+            <div className="ec-card__header"><h2>Destinos con mayor afluencia</h2><Link to="/admin/analitica">Analítica</Link></div>
+            <div className="ec-card__body destination-ranking">
+              {(data?.topDestinations ?? []).slice(0, 4).map((destination) => (
+                <div className="destination-bar" key={destination.id}><div><strong>{destination.name}</strong><span>{destination.visits.toLocaleString('es-MX')}</span></div><div className="destination-bar__track"><span style={{ width: `${Math.round((destination.visits / maxVisits) * 100)}%` }} /></div></div>
               ))}
+              {!isLoading && !data?.topDestinations.length && <div className="ec-note">Aún no hay métricas de destinos.</div>}
             </div>
-          </div>
+          </article>
+        </section>
 
-          <div className="bottom-grid">
-            <div className="card">
-              <div className="card__header">
-                <div>
-                  <h3>Actividad reciente</h3>
-                  <small>Datos demostrativos</small>
-                </div>
-
-                <button
-                  type="button"
-                  className="link-btn"
-                >
-                  Ver todo
-                </button>
-              </div>
-
-              {actividadReciente.map((actividad) => (
-                <div
-                  key={`${actividad.tipo}-${actividad.titulo}`}
-                  className="actividad-item"
-                >
-                  <div
-                    className={`actividad-item__icon ${
-                      actividad.tipo === 'reporte'
-                        ? 'icon--red'
-                        : 'icon--green'
-                    }`}
-                  >
-                    {actividad.tipo === 'negocio' && (
-                      <Store size={18} />
-                    )}
-                    {actividad.tipo === 'reporte' && (
-                      <AlertTriangle size={18} />
-                    )}
-                    {actividad.tipo === 'verificacion' && (
-                      <UserCheck size={18} />
-                    )}
-                  </div>
-
-                  <div className="actividad-item__content">
-                    <p>{actividad.titulo}</p>
-                    <span>{actividad.descripcion}</span>
-                  </div>
-
-                  {actividad.accionLabel && (
-                    <button
-                      type="button"
-                      className="btn btn--small"
-                    >
-                      {actividad.accionLabel}
-                    </button>
-                  )}
-
-                  {actividad.prioridadAlta && (
-                    <span className="badge-priority">
-                      PRIORIDAD ALTA
-                    </span>
-                  )}
-                </div>
-              ))}
+        <section className="admin-dashboard-bottom">
+          <article className="ec-card">
+            <div className="ec-card__header"><h2>Actividad reciente</h2><Link className="ec-button ec-button--ghost ec-button--sm" to="/admin/moderacion">Ver todo</Link></div>
+            <div className="activity-feed">
+              {pendingBusinesses.slice(0, 2).map((business) => <div className="activity-feed__item" key={business.id}><span className="activity-icon"><Store size={16} /></span><div><strong>{business.name} solicitó registrar un negocio.</strong><small>{relativeDate(business.createdAt)} · {business.businessTypeName}</small></div><Link to="/admin/negocios" className="ec-button ec-button--sm">Revisar</Link></div>)}
+              {alerts.slice(0, 3).map((alert) => <div className="activity-feed__item" key={alert.id}><span className="activity-icon activity-icon--red"><AlertTriangle size={16} /></span><div><strong>{alert.description}</strong><small>{relativeDate(alert.generatedAt)} · {alert.typeName}</small></div><Link to="/admin/moderacion" className="ec-badge ec-badge--red">Revisar</Link></div>)}
+              {!pendingBusinesses.length && !alerts.length && <div className="ec-note">No hay actividad pendiente.</div>}
             </div>
+          </article>
 
-            <div className="card">
-              <h3 style={{ marginBottom: 16 }}>
-                Acciones rápidas
-              </h3>
-
-              {accionesRapidas.map((accion) => (
-                <button
-                  key={accion.titulo}
-                  type="button"
-                  className="accion-item"
-                >
-                  <span className="accion-item__icon">
-                    {accion.icono}
-                  </span>
-                  <span>
-                    <strong>{accion.titulo}</strong>
-                    <p>{accion.descripcion}</p>
-                  </span>
-                </button>
-              ))}
-
-              <div className="estado-sistema">
-                <span className="estado-sistema__label">
-                  ESTADO DEL SISTEMA
-                </span>
-                <p>
-                  <i className="dot dot--green" /> Todos los servicios
-                  activos
-                </p>
-              </div>
+          <aside className="ec-card">
+            <div className="ec-card__header"><h2>Acciones rápidas</h2></div>
+            <div className="quick-actions">
+              <Link to="/admin/destinos" className="quick-action"><MapPinPlus size={18} /><span><strong>Registrar destino</strong><small>Añadir punto de interés</small></span><ArrowUpRight size={15} /></Link>
+              <Link to="/admin/negocios" className="quick-action"><CheckCircle2 size={18} /><span><strong>Aprobar negocio</strong><small>{pendingBusinesses.length} pendientes</small></span><ArrowUpRight size={15} /></Link>
+              <Link to="/admin/eventos/nuevo" className="quick-action"><CalendarPlus size={18} /><span><strong>Crear evento</strong><small>Promocionar cultura local</small></span><ArrowUpRight size={15} /></Link>
             </div>
-          </div>
-        </main>
+            <div className="system-status"><span>ESTADO DEL SISTEMA</span><p><i /> API y base de datos disponibles</p></div>
+          </aside>
+        </section>
       </div>
-    </div>
+    </PanelShell>
   );
 }
