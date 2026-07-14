@@ -10,45 +10,36 @@ import { SuscripcionExito } from './features/NegocioTuristico/Suscripcion/presen
 import { SuscripcionCancelado } from './features/NegocioTuristico/Suscripcion/presentation/pages/SuscripcionCancelado';
 import { ProtectedRoute } from './core/shared/components/ProtectedRoute';
 
-const RoutesComponent = () => {
+export default function RoutesComponent() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<Navigate to="/login" replace />}
-      />
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/registro" element={<Navigate to="/login" replace />} />
 
-      <Route
-        path="/login"
-        element={<LoginPage />}
-      />
+      <Route path="/admin/dashboard" element={<AdminRoute><AdminHomePage /></AdminRoute>} />
+      <Route path="/admin/usuarios" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
+      <Route path="/admin/destinos" element={<AdminRoute><AdminDestinationsPage /></AdminRoute>} />
+      <Route path="/admin/negocios" element={<AdminRoute><BusinessRequestsPage /></AdminRoute>} />
+      <Route path="/admin/negocios/solicitudes" element={<AdminRoute><BusinessRequestsPage /></AdminRoute>} />
+      <Route path="/admin/categorias" element={<AdminRoute><AdminCategoriesPage /></AdminRoute>} />
+      <Route path="/admin/eventos" element={<AdminRoute><HomeEventos /></AdminRoute>} />
+      <Route path="/admin/eventos/nuevo" element={<AdminRoute><Eventos /></AdminRoute>} />
+      <Route path="/admin/moderacion" element={<AdminRoute><AdminModerationPage /></AdminRoute>} />
+      <Route path="/admin/resenas" element={<AdminRoute><AdminReviewsPage /></AdminRoute>} />
+      <Route path="/admin/analitica" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
+      <Route path="/admin/analitica/pro" element={<AdminRoute><AdminIntelligenceProPage /></AdminRoute>} />
+      <Route path="/admin/perfil" element={<AdminRoute><AdminProfilePage /></AdminRoute>} />
+      <Route path="/admin/configuracion" element={<AdminRoute><AdminSettingsPage /></AdminRoute>} />
 
-      <Route
-        path="/registro"
-        element={<RegisterPage />}
-      />
-
-      <Route
-        path="/negocio/inicio"
-        element={
-          <ProtectedRoute
-            allowedRoles={["admin_negocio"]}
-          >
-            <NegocioHomePage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/negocio/promociones"
-        element={
-          <ProtectedRoute
-            allowedRoles={["admin_negocio"]}
-          >
-            <PromocionesPage />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/negocio/inicio" element={<BusinessRoute><NegocioHomePage /></BusinessRoute>} />
+      <Route path="/negocio/dashboard" element={<BusinessRoute><BusinessDashboardPage /></BusinessRoute>} />
+      <Route path="/negocio/promociones" element={<BusinessRoute><PromocionesPage /></BusinessRoute>} />
+      <Route path="/negocio/promociones/nueva" element={<BusinessRoute><NuevaPromocionPage /></BusinessRoute>} />
+      <Route path="/negocio/resenas" element={<BusinessRoute><BusinessReviewsPage /></BusinessRoute>} />
+      <Route path="/negocio/registrar" element={<BusinessRoute><RegistroNegocio /></BusinessRoute>} />
+      <Route path="/negocio/perfil" element={<BusinessRoute><BusinessProfilePage /></BusinessRoute>} />
+      <Route path="/negocio/soporte" element={<BusinessRoute><BusinessSupportPage /></BusinessRoute>} />
 
       <Route
         path="/negocio/promociones/nueva"

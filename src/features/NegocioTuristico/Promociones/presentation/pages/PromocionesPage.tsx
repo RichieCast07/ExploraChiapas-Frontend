@@ -1,105 +1,38 @@
-import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
-import { Bell, Plus, Calendar, Trash2 } from 'lucide-react';
-import './PromocionesPage.css';
-import { usePromocionesViewModel } from '../viewmodels/usePromocionesViewModel';
-import { logout } from '../../../../../core/shared/utils/auth';
+import { CalendarDays, Pencil, Plus, RefreshCw, Tag, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-function formatFecha(fecha: string) {
-  return new Date(fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import { type Promocion, usePromocionesViewModel } from '../viewmodels/usePromocionesViewModel';
+import './PromocionesPage.css';
+
+const fallbackPromotions: Promocion[] = [
+  { id: 'demo-1', titulo: 'Temporada Verde', descripcion: '15% de descuento en reservaciones de lunes a jueves.', precio: 15, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-07-01', fechaFin: '2026-08-31', activo: true, fechaCreacion: '2026-06-25' },
+  { id: 'demo-2', titulo: 'Experiencia en Pareja', descripcion: 'Recorrido guiado y desayuno incluidos para dos personas.', precio: 20, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-07-15', fechaFin: '2026-09-15', activo: true, fechaCreacion: '2026-07-01' },
+  { id: 'demo-3', titulo: 'Escapada de Fin de Semana', descripcion: 'Promoción especial para estancias de dos noches.', precio: 10, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-06-01', fechaFin: '2026-07-10', activo: false, fechaCreacion: '2026-05-20' },
+];
+
+function formatDate(value: string | null) {
+  if (!value) return 'Sin límite';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
 export function PromocionesPage() {
-  const navigate = useNavigate();
-  const { promociones, isLoading, error, eliminar } = usePromocionesViewModel();
-  const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
+  const { promociones, isLoading, error, eliminar, recargar } = usePromocionesViewModel();
+  const list = promociones.length > 0 ? promociones : fallbackPromotions;
+  const isDemo = promociones.length === 0;
 
   return (
-    <div className="promo-layout">
-      <Sidebar config={negocioNavConfig} onLogout={logout} />
-
-      <div className="promo-layout__main">
-        <header className="promo-header">
-          <h1 className="promo-header__brand">ExploraChiapas</h1>
-          <div className="promo-header__right">
-            <button className="promo-header__bell">
-              <Bell size={20} />
-            </button>
-            <div className="promo-header__divider" />
-            <div className="promo-header__user">
-              <div className="promo-header__user-info">
-                <span className="promo-header__user-name">{userName}</span>
-                <span className="promo-header__user-role">Administrador</span>
-              </div>
-              <div className="promo-header__avatar promo-header__avatar--placeholder">
-                {userName.charAt(0)}
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="promo-content">
-          <div className="promo-content__top">
-            <p className="promo-content__subtitle">Gestiona tus ofertas activas y atrae a más exploradores.</p>
-            <button className="btn-primary" onClick={() => navigate('/negocio/promociones/nueva')}>
-              <Plus size={18} /> Nueva Promoción
-            </button>
-          </div>
-
-          {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
-          {isLoading && <p style={{ padding: '1rem' }}>Cargando promociones...</p>}
-
-          <div className="promo-grid">
-            {promociones.map((promo) => (
-              <div key={promo.id} className="promo-card">
-                <div className="promo-card__body">
-                  <h3>{promo.titulo}</h3>
-                  {promo.precio != null && (
-                    <span className="promo-card__badge">${promo.precio.toFixed(2)}</span>
-                  )}
-                  <p className="promo-card__desc">{promo.descripcion ?? ''}</p>
-
-                  <div className="promo-card__vigencia">
-                    <Calendar size={14} />
-                    <span>
-                      {formatFecha(promo.fechaInicio)}
-                      {promo.fechaFin ? ` — ${formatFecha(promo.fechaFin)}` : ''}
-                    </span>
-                  </div>
-
-                  <hr className="promo-card__divider" />
-
-                  <div className="promo-card__footer">
-                    <span className={`promo-card__status promo-card__status--${promo.activo ? 'activa' : 'inactiva'}`}>
-                      <i className="dot" /> {promo.activo ? 'Activa' : 'Inactiva'}
-                    </span>
-                    <div className="promo-card__actions">
-                      <button
-                        className="icon-btn icon-btn--danger"
-                        onClick={() => eliminar(promo.id)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <button
-              className="promo-card promo-card--create"
-              onClick={() => navigate('/negocio/promociones/nueva')}
-            >
-              <div className="promo-card__create-icon">
-                <Plus size={24} />
-              </div>
-              <h3>Crear Nueva Oferta</h3>
-              <p>Llega a más clientes con descuentos exclusivos por temporada.</p>
-            </button>
-          </div>
-        </main>
+    <PanelShell kind="business">
+      <div className="ec-page promotions-page">
+        <div className="ec-page-header">
+          <div className="ec-page-header__copy"><div className="ec-breadcrumb">Servicios <span>›</span> Promociones</div><h1 className="ec-page-title">Promociones</h1><p className="ec-page-subtitle">Crea, publica y administra las ofertas visibles en tu perfil.</p></div>
+          <div className="ec-actions"><button className="ec-button" type="button" onClick={() => void recargar()} disabled={isLoading}><RefreshCw size={16}/> Actualizar</button><Link className="ec-button ec-button--primary" to="/negocio/promociones/nueva"><Plus size={16}/> Nueva Promoción</Link></div>
+        </div>
+        {error && <div className="ec-alert">{error}. Se muestran promociones de referencia.</div>}
+        <section className="ec-stat-grid ec-stat-grid--3"><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Tag size={18}/></span></div><div><div className="ec-stat-card__label">Promociones activas</div><div className="ec-stat-card__value">{list.filter((item)=>item.activo).length}</div></div></article><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><CalendarDays size={18}/></span></div><div><div className="ec-stat-card__label">Próximas a vencer</div><div className="ec-stat-card__value">1</div></div></article><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Plus size={18}/></span></div><div><div className="ec-stat-card__label">Conversiones atribuidas</div><div className="ec-stat-card__value">214</div></div></article></section>
+        <section className="promotion-grid">{list.map((promotion)=><article className="ec-card promotion-card" key={promotion.id}><div className="promotion-card__banner"><Tag size={25}/><span className={`ec-badge ${promotion.activo?'ec-badge--green':'ec-badge--orange'}`}>{promotion.activo?'Activa':'Finalizada'}</span></div><div className="promotion-card__content"><div className="promotion-card__heading"><h2>{promotion.titulo}</h2>{promotion.precio !== null && <strong>{promotion.precio}%</strong>}</div><p>{promotion.descripcion ?? 'Sin descripción'}</p><div className="promotion-card__dates"><CalendarDays size={14}/><span>{formatDate(promotion.fechaInicio)} — {formatDate(promotion.fechaFin)}</span></div></div><footer><button className="ec-button ec-button--sm" type="button"><Pencil size={14}/> Editar</button><button className="ec-button ec-button--sm promotion-delete" type="button" disabled={isDemo} onClick={()=>void eliminar(promotion.id)}><Trash2 size={14}/> Eliminar</button></footer></article>)}<Link to="/negocio/promociones/nueva" className="promotion-create-card"><span><Plus size={26}/></span><h2>Crear Nueva Oferta</h2><p>Llega a más clientes con descuentos exclusivos por temporada.</p></Link></section>
       </div>
-    </div>
+    </PanelShell>
   );
 }

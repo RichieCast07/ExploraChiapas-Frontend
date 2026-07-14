@@ -1,3 +1,19 @@
+import { Eye, LayoutDashboard, Plus, Route, Star, Tag } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import { useNegocioStatsViewModel } from '../viewmodels/useNegocioStatsViewModel';
+import './NegocioHomePage.css';
+
+function relativeDate(dateValue: string): string {
+  const date = new Date(dateValue);
+  const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+  if (minutes < 1) return 'Ahora';
+  if (minutes < 60) return `Hace ${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Hace ${hours} h`;
+  return date.toLocaleDateString('es-MX');
+}
 import { useState } from 'react';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
@@ -12,7 +28,8 @@ export function NegocioHomePage() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
 
-  const val = (n: number | undefined) => isLoading ? '...' : (n?.toLocaleString() ?? '0');
+export function NegocioHomePage() {
+  const { stats, recentReviews, isLoading, error, reload } = useNegocioStatsViewModel();
 
   async function handleSuscribirse() {
     setCheckoutLoading(true);
@@ -130,8 +147,9 @@ export function NegocioHomePage() {
               </div>
             </div>
           </div>
-        </main>
+          {!isLoading && recentReviews.length === 0 && <div className="ec-note">Todavía no hay reseñas para este negocio.</div>}
+        </section>
       </div>
-    </div>
+    </PanelShell>
   );
 }

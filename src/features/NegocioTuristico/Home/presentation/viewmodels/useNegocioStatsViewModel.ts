@@ -1,36 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
-import { BASE_URL } from '../../../../../core/shared/config/api';
-import { fetchAuth } from '../../../../../core/shared/utils/auth';
+import { apiRequest } from '../../../../../core/shared/api/apiClient';
 
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-}
-
-interface Negocio {
+interface Business {
   id: string;
   name: string;
-  description: string | null;
-  businessTypeId: string;
-  locationId: string;
-  priceFrom: number | null;
-  isVerified: boolean;
-  active: boolean;
-  createdAt: string;
-  averageRating: number;
-  totalReviews: number;
 }
 
-interface ApiNegocioStats {
+interface BusinessStatsApi {
   negocioId: string;
   totalFavoritos: number;
   calificacionPromedio: number;
   totalResenas: number;
+  visualizaciones: number;
+  clicsReserva: number;
+  vecesEnRutas: number;
 }
 
-interface NegocioStats {
+interface Promotion {
+  id: string;
+  activo: boolean;
+  fechaInicio: string;
+  fechaFin: string | null;
+}
+
+export interface RecentBusinessReview {
+  id: string;
+  userName: string;
+  rating: number;
+  comment: string | null;
+  response: string | null;
+  createdAt: string;
+}
+
+export interface NegocioStats extends BusinessStatsApi {
   negocioNombre: string;
   totalFavoritos: number;
   calificacionPromedio: number;
@@ -40,6 +43,7 @@ interface NegocioStats {
 
 export function useNegocioStatsViewModel() {
   const [stats, setStats] = useState<NegocioStats | null>(null);
+  const [recentReviews, setRecentReviews] = useState<RecentBusinessReview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,14 +112,31 @@ export function useNegocioStatsViewModel() {
       } finally {
         setIsLoading(false);
       }
-    };
 
-    void cargarEstadisticas();
+      const [businessStats, promotions, reviews] = await Promise.all([
+        apiRequest<BusinessStatsApi>(`/stats/businesses/${business.id}`),
+        apiRequest<Promotion[]>(`/promotions?negocioId=${encodeURIComponent(business.id)}`, {}, false),
+        apiRequest<RecentBusinessReview[]>(`/reviews/business/${business.id}`),
+      ]);
+
+      setStats({
+        ...businessStats,
+        negocioNombre: business.name,
+        promocionesActivas: promotions.filter(isActivePromotion).length,
+      });
+      setRecentReviews(reviews.slice(0, 3));
+    } catch (requestError) {
+      setStats(null);
+      setRecentReviews([]);
+      setError(requestError instanceof Error ? requestError.message : 'Error de conexión con el servidor');
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  return {
-    stats,
-    isLoading,
-    error,
-  };
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  return { stats, recentReviews, isLoading, error, reload: load };
 }

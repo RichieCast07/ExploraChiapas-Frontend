@@ -1,0 +1,14 @@
+.moderation-table-header { flex-wrap: wrap; }
+.moderation-filters { display: flex; gap: 8px; }
+.moderation-filters select { height: 31px; border: 1px solid #dce4dc; border-radius: 6px; padding: 0 8px; color: #677168; background: #f8faf8; font-size: 10px; }
+.moderation-search { display: flex; align-items: center; gap: 8px; margin: 12px 14px; padding: 0 10px; height: 36px; max-width: 360px; border: 1px solid #dce4dc; border-radius: 7px; color: #788179; }
+.moderation-search input { width: 100%; border: 0; outline: 0; font-size: 11px; }
+.moderation-comment { max-width: 230px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.moderation-priority { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; }
+.moderation-priority i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.moderation-priority--alta { color: #d13732; }.moderation-priority--media { color: #dd741e; }.moderation-priority--baja { color: #267db1; }
+.moderation-actions { display: flex; gap: 4px; }
+.moderation-actions button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; border-radius: 6px; background: #edf5ef; color: #187a39; cursor: pointer; }
+.moderation-actions button.danger { background: #fff0ef; color: #c63b36; }
+.moderation-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-top: 1px solid #e2e8e2; color: #7b847c; font-size: 10px; }
+.moderation-footer > div { display: flex; gap: 4px; }.moderation-footer button { min-width: 27px; height: 27px; border: 1px solid #dce4dc; border-radius: 6px; background: #fff; }.moderation-footer button.active { color: #fff; background: #167635; border-color: #167635; }

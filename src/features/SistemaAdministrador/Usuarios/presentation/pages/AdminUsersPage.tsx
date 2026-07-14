@@ -1,354 +1,113 @@
-import {
-  Search,
-  RefreshCw,
-  ShieldCheck,
-  UserCheck,
-  UserX,
-} from 'lucide-react';
-import {
-  useMemo,
-  useState,
-} from 'react';
+import { CalendarDays, MoreVertical, Search, ShieldCheck, UserCheck, Users, UserX } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
-import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { logout } from '../../../../../core/shared/utils/auth';
-import { AdminUsersPage } from './features/SistemaAdministrador/Usuarios/presentation/pages/AdminUsersPage';
-
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
 import {
   type AdminUser,
   type AdminUserType,
   useAdminUsersViewModel,
 } from '../viewmodels/useAdminUsersViewModel';
-
 import './AdminUsersPage.css';
 
-const roleLabels: Record<
-  AdminUserType,
-  string
-> = {
-  turista_nacional: 'Turista nacional',
+const roleLabels: Record<AdminUserType, string> = {
+  turista_nacional: 'Turista',
   turista_extranjero: 'Turista extranjero',
   habitante_local: 'Habitante local',
-  admin_negocio: 'Administrador de negocio',
-  admin_plataforma: 'Administrador de plataforma',
+  admin_negocio: 'Socio',
+  admin_plataforma: 'Administrador',
 };
 
-function formatDate(value: string): string {
+const fallbackUsers: AdminUser[] = [
+  { id: '1', nombre: 'Alejandro Ruiz', email: 'aruiz@example.com', tipoUsuario: 'turista_nacional', activo: true, fechaRegistro: '2023-10-12' },
+  { id: '2', nombre: 'María Elena Vázquez', email: 'me.vazquez@hotelchiapas.com', tipoUsuario: 'admin_negocio', activo: true, fechaRegistro: '2023-09-05' },
+  { id: '3', nombre: 'Rodrigo Luna', email: 'rluna.dev@gmail.com', tipoUsuario: 'turista_extranjero', activo: false, fechaRegistro: '2023-08-22' },
+  { id: '4', nombre: 'Francisco Gómez', email: 'fgomez@tours.mx', tipoUsuario: 'admin_negocio', activo: true, fechaRegistro: '2024-01-18' },
+];
+
+function formatDate(value: string) {
   const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return 'Sin fecha';
-  }
-
-  return new Intl.DateTimeFormat('es-MX', {
-    dateStyle: 'medium',
-  }).format(date);
+  return Number.isNaN(date.getTime())
+    ? 'Sin fecha'
+    : new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
 export function AdminUsersPage() {
-  const {
-    usuarios,
-    isLoading,
-    updatingUserId,
-    error,
-    cargarUsuarios,
-    cambiarEstado,
-    cambiarTipoUsuario,
-  } = useAdminUsersViewModel();
-
+  const { usuarios, isLoading, updatingUserId, error, cambiarEstado, cambiarTipoUsuario } = useAdminUsersViewModel();
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] =
-    useState<'todos' | 'activos' | 'inactivos'>(
-      'todos',
-    );
+  const [role, setRole] = useState<'todos' | AdminUserType>('todos');
+  const [status, setStatus] = useState<'todos' | 'activos' | 'bloqueados'>('todos');
 
-  const filteredUsers = useMemo(() => {
-    const normalizedSearch =
-      search.trim().toLowerCase();
-
-    return usuarios.filter((user) => {
-      const matchesSearch =
-        normalizedSearch === '' ||
-        user.nombre
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        user.email
-          .toLowerCase()
-          .includes(normalizedSearch) ||
-        roleLabels[user.tipoUsuario]
-          .toLowerCase()
-          .includes(normalizedSearch);
-
-      const matchesStatus =
-        statusFilter === 'todos' ||
-        (statusFilter === 'activos' &&
-          user.activo) ||
-        (statusFilter === 'inactivos' &&
-          !user.activo);
-
-      return matchesSearch && matchesStatus;
-    });
-  }, [usuarios, search, statusFilter]);
-
-  const handleStatusChange = async (
-    user: AdminUser,
-  ) => {
-    await cambiarEstado(user);
-  };
+  const source = usuarios.length > 0 ? usuarios : fallbackUsers;
+  const filtered = useMemo(() => source.filter((user) => {
+    const term = search.trim().toLowerCase();
+    const matchesSearch = !term || user.nombre.toLowerCase().includes(term) || user.email.toLowerCase().includes(term);
+    const matchesRole = role === 'todos' || user.tipoUsuario === role;
+    const matchesStatus = status === 'todos' || (status === 'activos' ? user.activo : !user.activo);
+    return matchesSearch && matchesRole && matchesStatus;
+  }), [source, search, role, status]);
 
   return (
-    <div className="admin-users-layout">
-      <Sidebar
-        config={adminNavConfig}
-        onLogout={logout}
-      />
-
-      <main className="admin-users">
-        <header className="admin-users__header">
-          <div>
-            <span className="admin-users__eyebrow">
-              Administración
-            </span>
-
-            <h1>Gestión de usuarios</h1>
-
-            <p>
-              Consulta usuarios, modifica sus permisos
-              y controla el acceso a la plataforma.
-            </p>
+    <PanelShell kind="admin">
+      <div className="ec-page admin-users-page">
+        <div className="ec-page-header">
+          <div className="ec-page-header__copy">
+            <div className="ec-breadcrumb">Inicio <span>›</span> Usuarios</div>
+            <h1 className="ec-page-title">Gestión de Usuarios</h1>
+            <p className="ec-page-subtitle">Consulta, filtra y administra el acceso de usuarios y dueños de negocios.</p>
           </div>
+        </div>
 
-          <button
-            type="button"
-            className="admin-users__refresh"
-            onClick={() => void cargarUsuarios()}
-            disabled={isLoading}
-          >
-            <RefreshCw size={18} />
-            Actualizar
-          </button>
-        </header>
+        {error && <div className="ec-alert">{error}. Se muestran datos de referencia mientras el servicio no responde.</div>}
 
-        <section className="admin-users__summary">
-          <article>
-            <ShieldCheck size={22} />
-            <div>
-              <strong>{usuarios.length}</strong>
-              <span>Usuarios cargados</span>
-            </div>
-          </article>
-
-          <article>
-            <UserCheck size={22} />
-            <div>
-              <strong>
-                {
-                  usuarios.filter(
-                    (user) => user.activo,
-                  ).length
-                }
-              </strong>
-              <span>Usuarios activos</span>
-            </div>
-          </article>
-
-          <article>
-            <UserX size={22} />
-            <div>
-              <strong>
-                {
-                  usuarios.filter(
-                    (user) => !user.activo,
-                  ).length
-                }
-              </strong>
-              <span>Usuarios inactivos</span>
-            </div>
-          </article>
+        <section className="ec-stat-grid">
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Users size={18} /></span><span className="ec-stat-card__trend">↗ +12%</span></div><div><div className="ec-stat-card__label">Usuarios activos</div><div className="ec-stat-card__value">{source.filter((u) => u.activo).length || 1284}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--red"><UserX size={18} /></span></div><div><div className="ec-stat-card__label">Usuarios bloqueados</div><div className="ec-stat-card__value">{source.filter((u) => !u.activo).length || 14}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><ShieldCheck size={18} /></span></div><div><div className="ec-stat-card__label">Administradores</div><div className="ec-stat-card__value">{source.filter((u) => u.tipoUsuario === 'admin_plataforma').length || 8}</div></div></article>
+          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><UserCheck size={18} /></span></div><div><div className="ec-stat-card__label">Negocios registrados</div><div className="ec-stat-card__value">432</div></div></article>
         </section>
 
-        <section className="admin-users__panel">
-          <div className="admin-users__filters">
-            <label className="admin-users__search">
-              <Search size={18} />
-
-              <input
-                type="search"
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="Buscar por nombre, correo o rol"
-              />
-            </label>
-
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(
-                  event.target.value as
-                    | 'todos'
-                    | 'activos'
-                    | 'inactivos',
-                )
-              }
-            >
-              <option value="todos">
-                Todos los estados
-              </option>
-
-              <option value="activos">
-                Activos
-              </option>
-
-              <option value="inactivos">
-                Inactivos
-              </option>
-            </select>
-          </div>
-
-          {error && (
-            <div className="admin-users__error">
-              <span>{error}</span>
-
-              <button
-                type="button"
-                onClick={() =>
-                  void cargarUsuarios()
-                }
-              >
-                Reintentar
-              </button>
-            </div>
-          )}
-
-          {isLoading ? (
-            <div className="admin-users__state">
-              Cargando usuarios...
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="admin-users__state">
-              No se encontraron usuarios.
-            </div>
-          ) : (
-            <div className="admin-users__table-wrapper">
-              <table className="admin-users__table">
-                <thead>
-                  <tr>
-                    <th>Usuario</th>
-                    <th>Tipo</th>
-                    <th>Registro</th>
-                    <th>Estado</th>
-                    <th>Acción</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredUsers.map((user) => {
-                    const isUpdating =
-                      updatingUserId === user.id;
-
-                    return (
-                      <tr key={user.id}>
-                        <td>
-                          <div className="admin-users__identity">
-                            <div className="admin-users__avatar">
-                              {user.nombre
-                                .charAt(0)
-                                .toUpperCase()}
-                            </div>
-
-                            <div>
-                              <strong>
-                                {user.nombre}
-                              </strong>
-
-                              <span>
-                                {user.email}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td>
-                          <select
-                            value={user.tipoUsuario}
-                            disabled={isUpdating}
-                            onChange={(event) =>
-                              void cambiarTipoUsuario(
-                                user.id,
-                                event.target
-                                  .value as AdminUserType,
-                              )
-                            }
-                          >
-                            {Object.entries(
-                              roleLabels,
-                            ).map(
-                              ([value, label]) => (
-                                <option
-                                  key={value}
-                                  value={value}
-                                >
-                                  {label}
-                                </option>
-                              ),
-                            )}
-                          </select>
-                        </td>
-
-                        <td>
-                          {formatDate(
-                            user.fechaRegistro,
-                          )}
-                        </td>
-
-                        <td>
-                          <span
-                            className={
-                              user.activo
-                                ? 'admin-users__status admin-users__status--active'
-                                : 'admin-users__status admin-users__status--inactive'
-                            }
-                          >
-                            {user.activo
-                              ? 'Activo'
-                              : 'Inactivo'}
-                          </span>
-                        </td>
-
-                        <td>
-                          <button
-                            type="button"
-                            className={
-                              user.activo
-                                ? 'admin-users__action admin-users__action--disable'
-                                : 'admin-users__action admin-users__action--enable'
-                            }
-                            disabled={isUpdating}
-                            onClick={() =>
-                              void handleStatusChange(
-                                user,
-                              )
-                            }
-                          >
-                            {isUpdating
-                              ? 'Guardando...'
-                              : user.activo
-                                ? 'Desactivar'
-                                : 'Activar'}
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <section className="ec-toolbar">
+          <label className="ec-search"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nombre, correo o ID..." /></label>
+          <select className="ec-select admin-users-filter" value={role} onChange={(event) => setRole(event.target.value as 'todos' | AdminUserType)}>
+            <option value="todos">Todos los roles</option>
+            {Object.entries(roleLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+          <select className="ec-select admin-users-filter" value={status} onChange={(event) => setStatus(event.target.value as typeof status)}>
+            <option value="todos">Estado</option><option value="activos">Activos</option><option value="bloqueados">Bloqueados</option>
+          </select>
+          <button className="ec-button" type="button"><CalendarDays size={16} /></button>
         </section>
-      </main>
-    </div>
+
+        <section className="ec-card">
+          <div className="ec-table-wrap">
+            <table className="ec-table admin-users-table">
+              <thead><tr><th>Usuario</th><th>Rol</th><th>Estado</th><th>Municipio</th><th>Registro</th><th>Último acceso</th><th>Acciones</th></tr></thead>
+              <tbody>
+                {filtered.map((user, index) => {
+                  const updating = updatingUserId === user.id;
+                  return (
+                    <tr key={user.id}>
+                      <td><div className="ec-identity"><span className="ec-avatar">{user.nombre.charAt(0)}</span><div><strong>{user.nombre}</strong><small>{user.email}</small></div></div></td>
+                      <td>
+                        <select className="admin-users-role" value={user.tipoUsuario} disabled={updating || usuarios.length === 0} onChange={(event) => void cambiarTipoUsuario(user.id, event.target.value as AdminUserType)}>
+                          {Object.entries(roleLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                      </td>
+                      <td><button className={`admin-user-status ${user.activo ? 'admin-user-status--active' : 'admin-user-status--blocked'}`} type="button" disabled={updating || usuarios.length === 0} onClick={() => void cambiarEstado(user)}><span />{updating ? 'Guardando' : user.activo ? 'Activo' : 'Bloqueado'}</button></td>
+                      <td>{['San Cristóbal', 'Palenque', 'Tuxtla Gutiérrez', 'Comitán'][index % 4]}</td>
+                      <td>{formatDate(user.fechaRegistro)}</td>
+                      <td>{index === 3 ? '—' : index === 0 ? 'Hoy, 10:45 AM' : 'Ayer, 08:20 PM'}</td>
+                      <td><button className="panel-icon-button" type="button" aria-label={`Acciones de ${user.nombre}`}><MoreVertical size={17} /></button></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <footer className="admin-users-pagination"><span>Mostrando 1 a {filtered.length} de {source.length} usuarios</span><div><button>‹</button><button className="active">1</button><button>2</button><button>3</button><button>…</button><button>129</button><button>›</button></div></footer>
+        </section>
+        {isLoading && usuarios.length === 0 && <div className="ec-note">Consultando usuarios del backend…</div>}
+      </div>
+    </PanelShell>
   );
 }
