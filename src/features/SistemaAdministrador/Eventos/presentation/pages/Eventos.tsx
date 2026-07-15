@@ -37,7 +37,7 @@ export function Eventos() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log({ nombre, categoria, descripcion, municipio, fecha, capacidad, horaInicio, horaFin, imagen });
-    navigate('/administrador/eventos');
+    navigate('/admin/eventos');
   };
 
   return (
@@ -191,7 +191,7 @@ export function Eventos() {
 
             {/* Acciones */}
             <div className="evento-actions">
-              <button type="button" className="btn-cancel" onClick={() => navigate('/administrador/eventos')}>
+              <button type="button" className="btn-cancel" onClick={() => navigate('/admin/eventos')}>
                 Cancelar
               </button>
               <button type="submit" className="btn-save">
