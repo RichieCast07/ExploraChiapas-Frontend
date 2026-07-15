@@ -210,3 +210,50 @@
     grid-template-columns: 1fr;
   }
 }
+
+.negocio-verified-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff8e1;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  color: #92400e;
+}
+
+.negocio-verified-banner--active {
+  background: #f0fdf4;
+  border-color: #22c55e;
+  color: #15803d;
+}
+
+.negocio-verified-banner__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  font-size: 14px;
+}
+
+.negocio-verified-banner__text strong {
+  font-size: 15px;
+}
+
+.negocio-verified-banner__btn {
+  background: #16a34a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.negocio-verified-banner__btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

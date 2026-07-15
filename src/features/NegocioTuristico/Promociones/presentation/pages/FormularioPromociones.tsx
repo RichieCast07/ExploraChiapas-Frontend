@@ -1,20 +1,11 @@
-<<<<<<< HEAD
-// features/NegocioTuristico/Promociones/presentation/pages/FormularioPromociones.tsx
-=======
->>>>>>> origin/richie
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
 import { Bell, Megaphone, ImagePlus, ChevronRight } from 'lucide-react';
 import './FormularioPromociones.css';
-<<<<<<< HEAD
-
-const usuario = { nombre: 'Selva Verde Resort', rol: 'Administrador', avatarUrl: '' };
-=======
 import { useNuevaPromocionViewModel } from '../viewmodels/useNuevaPromocionViewModel';
 import { logout } from '../../../../../core/shared/utils/auth';
->>>>>>> origin/richie
 
 export function FormularioPromociones() {
   const navigate = useNavigate();
@@ -49,7 +40,6 @@ export function FormularioPromociones() {
       <Sidebar config={negocioNavConfig} onLogout={logout} />
 
       <div className="nueva-promo-layout__main">
-        {/* Header */}
         <header className="nueva-promo-header">
           <h1 className="nueva-promo-header__brand">ExploraChiapas</h1>
           <div className="nueva-promo-header__right">
@@ -67,7 +57,6 @@ export function FormularioPromociones() {
           </div>
         </header>
 
-        {/* Contenido */}
         <main className="nueva-promo-content">
           <div className="nueva-promo-breadcrumb">
             <span>SERVICIOS</span>
@@ -176,3 +165,5 @@ export function FormularioPromociones() {
     </div>
   );
 }
+
+export { FormularioPromociones as NuevaPromocionPage };

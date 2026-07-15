@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-
 import { BASE_URL } from '../../../../../core/shared/config/api';
 import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
@@ -38,21 +37,11 @@ export function usePromocionesViewModel() {
     setError(null);
 
     try {
-      const negociosResponse = await fetchAuth(
-        `${BASE_URL}/businesses/mine`,
-      );
+      const negociosResponse = await fetchAuth(`${BASE_URL}/businesses/mine`);
+      const negociosBody = (await negociosResponse.json()) as ApiResponse<Negocio[]>;
 
-      const negociosBody =
-        (await negociosResponse.json()) as ApiResponse<Negocio[]>;
-
-      if (
-        !negociosResponse.ok ||
-        !negociosBody.success
-      ) {
-        throw new Error(
-          negociosBody.message ??
-            'No se pudieron cargar tus negocios',
-        );
+      if (!negociosResponse.ok || !negociosBody.success) {
+        throw new Error(negociosBody.message ?? 'No se pudieron cargar tus negocios');
       }
 
       const negocio = negociosBody.data?.[0];
@@ -66,28 +55,17 @@ export function usePromocionesViewModel() {
       setNegocioNombre(negocio.name);
 
       const promocionesResponse = await fetchAuth(
-        `${BASE_URL}/promotions?negocioId=${encodeURIComponent(
-          negocio.id,
-        )}`,
+        `${BASE_URL}/promotions?negocioId=${encodeURIComponent(negocio.id)}`,
       );
+      const promocionesBody = (await promocionesResponse.json()) as ApiResponse<Promocion[]>;
 
-      const promocionesBody =
-        (await promocionesResponse.json()) as ApiResponse<Promocion[]>;
-
-      if (
-        !promocionesResponse.ok ||
-        !promocionesBody.success
-      ) {
-        throw new Error(
-          promocionesBody.message ??
-            'No se pudieron cargar las promociones',
-        );
+      if (!promocionesResponse.ok || !promocionesBody.success) {
+        throw new Error(promocionesBody.message ?? 'No se pudieron cargar las promociones');
       }
 
       setPromociones(promocionesBody.data ?? []);
     } catch (requestError) {
       setPromociones([]);
-
       setError(
         requestError instanceof Error
           ? requestError.message
@@ -100,32 +78,15 @@ export function usePromocionesViewModel() {
 
   const eliminar = async (id: string): Promise<boolean> => {
     setError(null);
-
     try {
-      const response = await fetchAuth(
-        `${BASE_URL}/promotions/${id}`,
-        {
-          method: 'DELETE',
-        },
-      );
+      const response = await fetchAuth(`${BASE_URL}/promotions/${id}`, { method: 'DELETE' });
 
       if (!response.ok) {
-        const body = (await response
-          .json()
-          .catch(() => null)) as ApiResponse<unknown> | null;
-
-        throw new Error(
-          body?.message ??
-            'No se pudo eliminar la promoción',
-        );
+        const body = (await response.json().catch(() => null)) as ApiResponse<unknown> | null;
+        throw new Error(body?.message ?? 'No se pudo eliminar la promoción');
       }
 
-      setPromociones((currentPromotions) =>
-        currentPromotions.filter(
-          (promotion) => promotion.id !== id,
-        ),
-      );
-
+      setPromociones(prev => prev.filter(p => p.id !== id));
       return true;
     } catch (requestError) {
       setError(
@@ -133,7 +94,6 @@ export function usePromocionesViewModel() {
           ? requestError.message
           : 'Error al eliminar la promoción',
       );
-
       return false;
     }
   };
@@ -142,12 +102,5 @@ export function usePromocionesViewModel() {
     void cargar();
   }, []);
 
-  return {
-    promociones,
-    negocioNombre,
-    isLoading,
-    error,
-    eliminar,
-    recargar: cargar,
-  };
+  return { promociones, negocioNombre, isLoading, error, eliminar, recargar: cargar };
 }
