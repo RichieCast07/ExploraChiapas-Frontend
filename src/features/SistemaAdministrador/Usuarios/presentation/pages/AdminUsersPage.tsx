@@ -13,7 +13,6 @@ import {
 import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { logout } from '../../../../../core/shared/utils/auth';
-import { AdminUsersPage } from './features/SistemaAdministrador/Usuarios/presentation/pages/AdminUsersPage';
 
 import {
   type AdminUser,

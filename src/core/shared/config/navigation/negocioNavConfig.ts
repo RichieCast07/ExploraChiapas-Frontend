@@ -18,7 +18,7 @@ export const negocioNavConfig: NavConfig = {
         { label: 'Inicio', icon: Home, path: '/negocio/inicio' },
         { label: 'Dashboard', icon: LayoutDashboard, path: '/negocio/dashboard' },
         { label: 'Promociones', icon: Tag, path: '/negocio/promociones' },
-        { label: 'Reseñas', icon: Star, path: '/negocio/resenas' },
+        { label: 'Reseñas', icon: Star, path: '/negocio/reseñas' },
         { label: 'Registrar Negocio', icon: Store, path: '/negocio/registrar' },
         { label: 'Perfil', icon: User, path: '/negocio/perfil' },
       ],

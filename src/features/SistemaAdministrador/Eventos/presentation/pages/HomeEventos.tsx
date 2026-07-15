@@ -82,7 +82,7 @@ export function HomeEventos() {
 
           <div className="ge-title-row">
             <h1>Gestión de Eventos Turísticos</h1>
-            <button className="btn-crear-evento" onClick={() => navigate('/administrador/eventos/nuevo')}>
+            <button className="btn-crear-evento" onClick={() => navigate('/admin/eventos/nuevo')}>
               <Plus size={18} /> Crear Evento
             </button>
           </div>
@@ -153,7 +153,7 @@ export function HomeEventos() {
                           </button>
                         ) : (
                           <>
-                            <button className="icon-btn" onClick={() => navigate(`/administrador/eventos/editar/${evento.id}`)}>
+                            <button className="icon-btn" onClick={() => navigate(`/admin/eventos/editar/${evento.id}`)}>
                               <Pencil size={16} />
                             </button>
                             <button className="icon-btn icon-btn--danger">
