@@ -35,15 +35,10 @@ export interface RecentBusinessReview {
 
 export interface NegocioStats extends BusinessStatsApi {
   negocioNombre: string;
-  promocionesActivas: number;
-}
-
-function isActivePromotion(promotion: Promotion): boolean {
-  if (!promotion.activo) return false;
-  const now = new Date();
-  const start = new Date(`${promotion.fechaInicio}T00:00:00`);
-  const end = promotion.fechaFin ? new Date(`${promotion.fechaFin}T23:59:59`) : null;
-  return start <= now && (!end || end >= now);
+  totalFavoritos: number;
+  calificacionPromedio: number;
+  totalResenas: number;
+  isVerified: boolean;
 }
 
 export function useNegocioStatsViewModel() {
@@ -52,18 +47,70 @@ export function useNegocioStatsViewModel() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const businesses = await apiRequest<Business[]>('/businesses/mine');
-      const business = businesses[0];
-      if (!business) {
-        setStats(null);
-        setRecentReviews([]);
-        setError('No tienes negocios registrados');
-        return;
+      try {
+        const negociosResponse = await fetchAuth(
+          `${BASE_URL}/businesses/mine`,
+        );
+
+        const negociosBody =
+          (await negociosResponse.json()) as ApiResponse<Negocio[]>;
+
+        if (
+          !negociosResponse.ok ||
+          !negociosBody.success
+        ) {
+          throw new Error(
+            negociosBody.message ??
+              'No se pudieron cargar tus negocios',
+          );
+        }
+
+        const negocio = negociosBody.data?.[0];
+
+        if (!negocio) {
+          setError('No tienes negocios registrados');
+          return;
+        }
+
+        const statsResponse = await fetchAuth(
+          `${BASE_URL}/stats/businesses/${negocio.id}`,
+        );
+
+        const statsBody =
+          (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
+
+        if (statsBody.success) {
+          setStats({
+            negocioNombre: negocio.name,
+            totalFavoritos: statsBody.data.totalFavoritos,
+            calificacionPromedio: statsBody.data.calificacionPromedio,
+            totalResenas: statsBody.data.totalResenas,
+            isVerified: Boolean(negocio.isVerified),
+          });
+        } else {
+          setError(statsBody.message ?? 'Error al cargar estadísticas');
+        }
+
+        setStats({
+          negocioNombre: negocio.name,
+          totalFavoritos: statsBody.data.totalFavoritos,
+          calificacionPromedio:
+            statsBody.data.calificacionPromedio,
+          totalResenas: statsBody.data.totalResenas,
+        });
+      } catch (requestError) {
+        setError(
+          requestError instanceof Error
+            ? requestError.message
+            : 'Error de conexión con el servidor',
+        );
+      } finally {
+        setIsLoading(false);
       }
 
       const [businessStats, promotions, reviews] = await Promise.all([

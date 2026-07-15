@@ -50,23 +50,10 @@ function relativeDate(value: string): string {
 }
 
 export function AdminHomePage() {
-  const { data, isLoading, error, reload } = useAdminAnalyticsViewModel();
-  const [pendingBusinesses, setPendingBusinesses] = useState<PendingBusiness[]>([]);
-  const [alerts, setAlerts] = useState<AlertItem[]>([]);
-  const [activityError, setActivityError] = useState<string | null>(null);
+  const { stats, isLoading } = useAdminStatsViewModel();
+  const userName = localStorage.getItem('user_name') ?? 'Admin';
 
-  const loadActivity = async () => {
-    try {
-      const [businesses, alertData] = await Promise.all([
-        apiRequest<PendingBusiness[]>('/businesses/admin/requests?status=pendiente'),
-        apiRequest<AlertItem[]>('/alerts?statusName=pendiente&limit=10'),
-      ]);
-      setPendingBusinesses(businesses);
-      setAlerts(alertData);
-      setActivityError(null);
-    } catch (requestError) {
-      setActivityError(requestError instanceof Error ? requestError.message : 'No se pudo cargar la actividad reciente');
-    }
+    return value?.toLocaleString('es-MX') ?? '0';
   };
 
   useEffect(() => {
@@ -77,17 +64,13 @@ export function AdminHomePage() {
     await Promise.all([reload(), loadActivity()]);
   };
 
-  const summary = data?.summary;
-  const pendingReports = alerts.filter((alert) => alert.statusName === 'pendiente').length;
-  const maxVisits = Math.max(1, ...(data?.topDestinations.map((destination) => destination.visits) ?? [1]));
-
-  return (
-    <PanelShell kind="admin">
-      <div className="ec-page admin-dashboard-page">
-        <div className="ec-page-header">
-          <div className="ec-page-header__copy">
-            <h1 className="ec-page-title">Dashboard General</h1>
-            <p className="ec-page-subtitle">Resumen operativo obtenido directamente de la API de ExploraChiapas.</p>
+            <div className="admin-header__user">
+              <div className="admin-header__user-info">
+                <span className="admin-header__user-name">{userName}</span>
+                <span className="admin-header__user-role">SUPER ADMINISTRADOR</span>
+              </div>
+              <div className="admin-header__avatar">{userName.charAt(0).toUpperCase()}</div>
+            </div>
           </div>
           <div className="ec-actions">
             <button className="ec-button" type="button" onClick={() => void refresh()} disabled={isLoading}>Actualizar datos</button>

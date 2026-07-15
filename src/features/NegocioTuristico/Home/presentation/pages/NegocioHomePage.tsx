@@ -14,38 +14,138 @@ function relativeDate(dateValue: string): string {
   if (hours < 24) return `Hace ${hours} h`;
   return date.toLocaleDateString('es-MX');
 }
+import { useState } from 'react';
+import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
+import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
+import { Bell, Heart, MessageSquare, Star, ShieldCheck, BadgeCheck } from 'lucide-react';
+import './NegocioHomePage.css';
+import { useNegocioStatsViewModel } from '../viewmodels/useNegocioStatsViewModel';
+import { logout, fetchAuth } from '../../../../../core/shared/utils/auth';
+import { BASE_URL } from '../../../../../core/shared/config/api';
+
+export function NegocioHomePage() {
+  const { stats, isLoading, error } = useNegocioStatsViewModel();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
 
 export function NegocioHomePage() {
   const { stats, recentReviews, isLoading, error, reload } = useNegocioStatsViewModel();
 
+  async function handleSuscribirse() {
+    setCheckoutLoading(true);
+    try {
+      const res = await fetchAuth(`${BASE_URL}/payments/checkout`, { method: 'POST' });
+      const body = await res.json();
+      if (body.success && body.url) {
+        window.location.href = body.url;
+      }
+    } finally {
+      setCheckoutLoading(false);
+    }
+  }
+
   return (
-    <PanelShell kind="business">
-      <div className="ec-page business-home-page">
-        <div className="business-home-actions"><button className="ec-button" type="button" onClick={() => void reload()} disabled={isLoading}>Actualizar</button><Link className="ec-button ec-button--primary" to="/negocio/promociones/nueva"><Plus size={16}/> Nueva promoción</Link></div>
-        {error && <div className="ec-alert">{error}</div>}
+    <div className="negocio-layout">
+      <Sidebar config={negocioNavConfig} onLogout={logout} />
 
-        <section className="ec-stat-grid ec-stat-grid--3 business-home-stats">
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Eye size={18}/></span><span className="ec-stat-card__trend">Acumulado</span></div><div><div className="ec-stat-card__label">Visualizaciones</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.visualizaciones ?? 0).toLocaleString('es-MX')}</div></div></article>
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><Star size={18}/></span><span className="ec-badge">{stats?.totalResenas ?? 0} reseñas</span></div><div><div className="ec-stat-card__label">Calificación promedio</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.calificacionPromedio ?? 0).toFixed(1)} <small>/5.0</small></div></div></article>
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Tag size={18}/></span><Link className="business-stat-link" to="/negocio/promociones">Ver todas</Link></div><div><div className="ec-stat-card__label">Promociones activas</div><div className="ec-stat-card__value">{isLoading ? '…' : stats?.promocionesActivas ?? 0}</div></div></article>
-        </section>
+      <div className="negocio-layout__main">
+        <header className="negocio-header">
+          <h1 className="negocio-header__brand">ExploraChiapas</h1>
 
-        <section className="ec-stat-grid ec-stat-grid--3 business-home-stats">
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Route size={18}/></span></div><div><div className="ec-stat-card__label">Incluido en rutas</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.vecesEnRutas ?? 0).toLocaleString('es-MX')}</div></div></article>
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><Eye size={18}/></span></div><div><div className="ec-stat-card__label">Clics en reservar</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.clicsReserva ?? 0).toLocaleString('es-MX')}</div></div></article>
-          <article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Star size={18}/></span></div><div><div className="ec-stat-card__label">Favoritos</div><div className="ec-stat-card__value">{isLoading ? '…' : (stats?.totalFavoritos ?? 0).toLocaleString('es-MX')}</div></div></article>
-        </section>
+          <div className="negocio-header__right">
+            <button className="negocio-header__bell">
+              <Bell size={20} />
+            </button>
+            <div className="negocio-header__divider" />
+            <div className="negocio-header__user">
+              <div className="negocio-header__user-info">
+                <span className="negocio-header__user-name">{stats?.negocioNombre ?? userName}</span>
+                <span className="negocio-header__user-role">Administrador</span>
+              </div>
+              <div className="negocio-header__avatar negocio-header__avatar--placeholder">
+                {(stats?.negocioNombre ?? userName).charAt(0)}
+              </div>
+            </div>
+          </div>
+        </header>
 
-        <section className="business-shortcuts">
-          <Link to="/negocio/dashboard" className="business-shortcut"><span><LayoutDashboard size={20}/></span><h2>Dashboard</h2><p>Consulta tráfico, interacción y conversión.</p></Link>
-          <Link to="/negocio/promociones" className="business-shortcut"><span><Tag size={20}/></span><h2>Promociones</h2><p>Crea y gestiona tus ofertas especiales.</p></Link>
-          <Link to="/negocio/resenas" className="business-shortcut"><span><Star size={20}/></span><h2>Reseñas</h2><p>Responde a tus clientes y mejora tu reputación.</p></Link>
-        </section>
+        <main className="negocio-content">
+          {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
 
-        <section className="ec-card business-activity-card">
-          <div className="ec-card__header"><h2>Reseñas recientes</h2><Link className="ec-button ec-button--ghost ec-button--sm" to="/negocio/resenas">Ver todas ›</Link></div>
-          <div className="business-activity-list">
-            {recentReviews.map((item)=><article key={item.id}><span className="ec-avatar">{item.userName.charAt(0).toUpperCase()}</span><div><div className="business-activity-top"><strong>{item.userName}</strong><small>{relativeDate(item.createdAt)}</small></div><span className="business-stars">{'★'.repeat(item.rating)}{'☆'.repeat(5-item.rating)}</span><p>“{item.comment || 'Sin comentario'}”</p>{item.response && <small>Respuesta enviada: {item.response}</small>}</div></article>)}
+          {!isLoading && stats && (
+            stats.isVerified ? (
+              <div className="negocio-verified-banner negocio-verified-banner--active">
+                <BadgeCheck size={20} />
+                <span>Negocio verificado</span>
+              </div>
+            ) : (
+              <div className="negocio-verified-banner">
+                <ShieldCheck size={20} />
+                <div className="negocio-verified-banner__text">
+                  <strong>Verifica tu negocio</strong>
+                  <span>Suscríbete por $99 MXN/mes y obtén la insignia de negocio verificado</span>
+                </div>
+                <button
+                  className="negocio-verified-banner__btn"
+                  onClick={handleSuscribirse}
+                  disabled={checkoutLoading}
+                >
+                  {checkoutLoading ? 'Cargando...' : 'Suscribirse'}
+                </button>
+              </div>
+            )
+          )}
+
+          <div className="negocio-stats-grid">
+            <div className="negocio-stat-card">
+              <div className="negocio-stat-card__top">
+                <span className="negocio-stat-card__label">Favoritos del Negocio</span>
+                <div className="negocio-stat-card__icon icon--green">
+                  <Heart size={18} />
+                </div>
+              </div>
+              <div className="negocio-stat-card__value-row">
+                <span className="negocio-stat-card__value">{val(stats?.totalFavoritos)}</span>
+              </div>
+              <p className="negocio-stat-card__footer">usuarios lo han marcado como favorito</p>
+            </div>
+
+            <div className="negocio-stat-card">
+              <div className="negocio-stat-card__top">
+                <span className="negocio-stat-card__label">Total de Reseñas</span>
+                <div className="negocio-stat-card__icon icon--blue">
+                  <MessageSquare size={18} />
+                </div>
+              </div>
+              <div className="negocio-stat-card__value-row">
+                <span className="negocio-stat-card__value">{val(stats?.totalResenas)}</span>
+              </div>
+              <p className="negocio-stat-card__footer">reseñas recibidas</p>
+            </div>
+
+            <div className="negocio-stat-card">
+              <div className="negocio-stat-card__top">
+                <span className="negocio-stat-card__label">Calificación Promedio</span>
+                <div className="negocio-stat-card__icon icon--yellow">
+                  <Star size={18} />
+                </div>
+              </div>
+              <div className="negocio-stat-card__value-row">
+                <span className="negocio-stat-card__value">
+                  {isLoading ? '...' : `${stats?.calificacionPromedio?.toFixed(1) ?? '0.0'}/5`}
+                </span>
+              </div>
+              <div className="negocio-stat-card__stars">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    size={16}
+                    fill={i < Math.round(stats?.calificacionPromedio ?? 0) ? '#f59e0b' : 'none'}
+                    color="#f59e0b"
+                  />
+                ))}
+              </div>
+            </div>
           </div>
           {!isLoading && recentReviews.length === 0 && <div className="ec-note">Todavía no hay reseñas para este negocio.</div>}
         </section>
