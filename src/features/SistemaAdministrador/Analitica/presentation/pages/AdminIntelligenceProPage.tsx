@@ -1,8 +1,33 @@
-import { Activity, BrainCircuit, CalendarDays, Download, FileText, MapPinned, Route, Sparkles, Store, TrendingUp, Users } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  BrainCircuit,
+  MapPinned,
+  Route,
+  Search,
+  Sparkles,
+  Store,
+  TrendingUp,
+  Users,
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import type { MunicipalityDistribution } from '../../data/models/Analytics';
+import { AnalyticsEmptyState } from '../components/AnalyticsEmptyState';
+import { AnalyticsFilters } from '../components/AnalyticsFilters';
+import { ExportButtons } from '../components/ExportButtons';
+import { MetricCard } from '../components/MetricCard';
 import { useAdminAnalyticsViewModel } from '../viewmodels/useAdminAnalyticsViewModel';
 import './AdminIntelligenceProPage.css';
 
@@ -10,69 +35,219 @@ function number(value: number | undefined): string {
   return (value ?? 0).toLocaleString('es-MX');
 }
 
-export function AdminIntelligenceProPage() {
-  const { data, isLoading, error, reload } = useAdminAnalyticsViewModel();
-  const summary = data?.summary;
-  const monthly = data?.monthly ?? [];
-  const topDestinations = data?.topDestinations ?? [];
-  const highest = topDestinations[0];
-  const least = topDestinations.length ? topDestinations[topDestinations.length - 1] : null;
-
-  const exportJson = () => {
-    if (!data) return;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `explora-chiapas-analitica-${new Date().toISOString().slice(0, 10)}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+function visitorLabel(type: string): string {
+  const labels: Record<string, string> = {
+    turista_nacional: 'Turista nacional',
+    turista_extranjero: 'Turista extranjero',
+    habitante_local: 'Habitante local',
   };
+  return labels[type] ?? type.replaceAll('_', ' ');
+}
+
+function mapPosition(
+  item: MunicipalityDistribution,
+  municipalities: MunicipalityDistribution[],
+): { left: number; top: number; size: number; intensity: number } {
+  const latitudes = municipalities.map((current) => current.latitude).filter(Number.isFinite);
+  const longitudes = municipalities.map((current) => current.longitude).filter(Number.isFinite);
+  const engagements = municipalities.map((current) => current.visits + current.searches);
+  const minLatitude = Math.min(...latitudes);
+  const maxLatitude = Math.max(...latitudes);
+  const minLongitude = Math.min(...longitudes);
+  const maxLongitude = Math.max(...longitudes);
+  const latitudeRange = maxLatitude - minLatitude;
+  const longitudeRange = maxLongitude - minLongitude;
+  const maxEngagement = Math.max(1, ...engagements);
+  const intensity = (item.visits + item.searches) / maxEngagement;
+
+  return {
+    left: longitudeRange ? 8 + ((item.longitude - minLongitude) / longitudeRange) * 84 : 50,
+    top: latitudeRange ? 8 + ((maxLatitude - item.latitude) / latitudeRange) * 84 : 50,
+    size: 24 + Math.sqrt(intensity) * 38,
+    intensity,
+  };
+}
+
+export function AdminIntelligenceProPage() {
+  const {
+    data,
+    filters,
+    isLoading,
+    error,
+    applyFilters,
+    reload,
+  } = useAdminAnalyticsViewModel();
+  const summary = data?.summary;
+  const topDestinations = data?.topDestinations ?? [];
+  const municipalities = (data?.municipalityDistribution ?? []).filter(
+    (item) => Number.isFinite(item.latitude) && Number.isFinite(item.longitude),
+  );
+  const maxDestinationActivity = Math.max(
+    1,
+    ...topDestinations.map((destination) => destination.visits + destination.searches),
+  );
+  const maxSearches = Math.max(1, ...(data?.topSearches ?? []).map((item) => item.total));
+  const maxInterest = Math.max(1, ...(data?.interestDistribution ?? []).map((item) => item.total));
+  const highest = topDestinations[0];
 
   return (
     <PanelShell kind="admin">
       <div className="ec-page intelligence-pro-page">
         <div className="ec-page-header">
-          <div className="ec-page-header__copy"><h1 className="ec-page-title">Inteligencia Turística Pro <span className="ec-badge ec-badge--green">PRO</span></h1><p className="ec-page-subtitle">Vista ampliada de los indicadores disponibles en la API.</p></div>
-          <div className="ec-actions"><Link className="ec-button" to="/admin/analitica">Vista básica</Link><button className="ec-button" type="button" onClick={exportJson} disabled={!data}><Download size={15} /> Exportar JSON</button><button className="ec-button ec-button--primary" type="button" onClick={() => void reload()} disabled={isLoading}><FileText size={15} /> Actualizar</button></div>
+          <div className="ec-page-header__copy">
+            <div className="ec-breadcrumb">Dashboard <span>›</span> Analítica <span>›</span> Vista Pro</div>
+            <h1 className="ec-page-title">Inteligencia Turística <span className="ec-badge ec-badge--green">PRO</span></h1>
+            <p className="ec-page-subtitle">Tendencias, demanda, perfiles y sostenibilidad calculados con actividad real de ExploraChiapas.</p>
+          </div>
+          <div className="ec-actions">
+            <Link className="ec-button" to="/admin/analitica">Vista general</Link>
+            <ExportButtons data={data} />
+            <button className="ec-button ec-button--primary" type="button" onClick={() => void reload()} disabled={isLoading}>Actualizar</button>
+          </div>
         </div>
 
         {error && <div className="ec-note ec-note--danger">{error}</div>}
-        <section className="intelligence-filter-strip"><button type="button">Chiapas</button><button type="button">Últimos 6 meses</button><button type="button">Todos los municipios</button><span /><strong><i /> Datos desde MariaDB</strong></section>
+
+        <AnalyticsFilters
+          value={filters}
+          municipalities={data?.availableMunicipalities ?? []}
+          isLoading={isLoading}
+          onApply={applyFilters}
+        />
+
+        <section className="analytics-source-strip">
+          <span><i /> API conectada</span>
+          <strong>{data ? `${data.filters.from.slice(0, 10)} al ${data.filters.to.slice(0, 10)}` : 'Consultando periodo…'}</strong>
+          <span>{data?.filters.municipality ?? 'Todo Chiapas'}</span>
+        </section>
 
         <section className="ec-stat-grid ec-stat-grid--6 intelligence-pro-stats">
-          {[
-            ['Afluencia destinos', number(summary?.afluenciaDestinos), MapPinned, 'green'],
-            ['Usuarios activos', number(summary?.totalUsuarios), Users, 'orange'],
-            ['Visualizaciones negocio', number(summary?.visualizacionesNegocios), Activity, 'blue'],
-            ['Clics en reservar', number(summary?.clicsReservaNegocios), Sparkles, 'green'],
-            ['Rutas creadas', number(summary?.totalRutas), Route, 'blue'],
-            ['Negocios verificados', number(summary?.negociosVerificados), Store, 'orange'],
-          ].map(([label, value, Icon, tone]) => {
-            const IconComponent = Icon as typeof Users;
-            return <article className="ec-stat-card" key={String(label)}><div className="ec-stat-card__top"><span className={`ec-stat-card__icon ${tone === 'orange' ? 'ec-stat-card__icon--orange' : tone === 'blue' ? 'ec-stat-card__icon--blue' : ''}`}><IconComponent size={16} /></span></div><div><div className="ec-stat-card__label">{label}</div><div className="ec-stat-card__value">{isLoading ? '…' : value}</div></div></article>;
-          })}
+          <MetricCard label="Afluencia destinos" value={number(summary?.afluenciaDestinos)} icon={MapPinned} isLoading={isLoading} />
+          <MetricCard label="Usuarios del periodo" value={number(summary?.totalUsuarios)} icon={Users} tone="orange" isLoading={isLoading} />
+          <MetricCard label="Vistas de negocios" value={number(summary?.visualizacionesNegocios)} icon={Activity} tone="blue" isLoading={isLoading} />
+          <MetricCard label="Clics en reservar" value={number(summary?.clicsReservaNegocios)} icon={Sparkles} isLoading={isLoading} />
+          <MetricCard label="Rutas creadas" value={number(summary?.totalRutas)} icon={Route} tone="blue" isLoading={isLoading} />
+          <MetricCard label="Negocios verificados" value={number(summary?.negociosVerificados)} icon={Store} tone="orange" isLoading={isLoading} />
         </section>
 
         <section className="intelligence-main-grid">
-          <article className="ec-card intelligence-attendance"><div className="ec-card__header"><div><h2>Actividad mensual</h2><small>Usuarios registrados, rutas y eventos</small></div></div><div className="intelligence-chart"><ResponsiveContainer width="100%" height={330}><AreaChart data={monthly}><defs><linearGradient id="attendanceFill" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#167a39" stopOpacity={0.55}/><stop offset="95%" stopColor="#167a39" stopOpacity={0.06}/></linearGradient></defs><XAxis dataKey="month" axisLine={false} tickLine={false} fontSize={10}/><YAxis allowDecimals={false}/><Tooltip/><Area dataKey="users" name="Usuarios" type="monotone" stroke="#167a39" strokeWidth={3} fill="url(#attendanceFill)"/><Area dataKey="routes" name="Rutas" type="monotone" stroke="#e87528" strokeWidth={2} fillOpacity={0}/><Area dataKey="events" name="Eventos" type="monotone" stroke="#317bb5" strokeWidth={2} fillOpacity={0}/></AreaChart></ResponsiveContainer></div></article>
-          <aside className="intelligence-insights">
-            <article className="ec-card"><div className="ec-card__header"><h2><BrainCircuit size={17} /> Resumen automático</h2><span className="ec-badge ec-badge--green">REAL</span></div><div className="ec-card__body intelligence-insight-list"><div><strong>Destino con mayor afluencia</strong><p>{highest ? `${highest.name} registra ${number(highest.visits)} visitas.` : 'Todavía no existen métricas de afluencia.'}</p><span>Calculado por la API</span></div><div><strong>Cobertura comercial</strong><p>{number(summary?.negociosVerificados)} de {number(summary?.totalNegocios)} negocios están verificados.</p><span>Validación de negocios</span></div><div><strong>Contenido disponible</strong><p>{number(summary?.totalDestinos)} destinos y {number(summary?.totalEventos)} eventos activos.</p><span>Inventario actual</span></div></div></article>
+          <article className="ec-card">
+            <div className="ec-card__header"><div><h2>Tendencias de búsqueda e interés</h2><small>Búsquedas y visualizaciones por mes</small></div><TrendingUp size={18} /></div>
+            <div className="intelligence-chart">
+              <ResponsiveContainer width="100%" height={310}>
+                <AreaChart data={data?.searchTrends ?? []} margin={{ top: 10, right: 16, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="searchFill" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#18783a" stopOpacity={0.42} /><stop offset="95%" stopColor="#18783a" stopOpacity={0.03} /></linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#edf1ed" />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} fontSize={10} />
+                  <YAxis allowDecimals={false} axisLine={false} tickLine={false} fontSize={10} />
+                  <Tooltip />
+                  <Legend />
+                  <Area dataKey="searches" name="Búsquedas" type="monotone" stroke="#18783a" strokeWidth={3} fill="url(#searchFill)" />
+                  <Area dataKey="destinationViews" name="Vistas de destinos" type="monotone" stroke="#e87528" strokeWidth={2} fillOpacity={0} />
+                  <Area dataKey="businessViews" name="Vistas de negocios" type="monotone" stroke="#317bb5" strokeWidth={2} fillOpacity={0} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </article>
+
+          <aside className="ec-card">
+            <div className="ec-card__header"><h2><Search size={17} /> Búsquedas principales</h2></div>
+            <div className="ec-card__body analytics-bar-list">
+              {(data?.topSearches ?? []).map((item, index) => (
+                <div key={`${item.term}-${item.targetType}`}>
+                  <p><strong>#{index + 1} {item.term}</strong><span>{number(item.total)}</span></p>
+                  <i><span style={{ width: `${Math.max(5, (item.total / maxSearches) * 100)}%` }} /></i>
+                </div>
+              ))}
+              {!isLoading && !data?.topSearches.length && <AnalyticsEmptyState title="Sin búsquedas registradas" description="Los eventos de búsqueda aparecerán aquí al conectar POST /stats/events desde la aplicación del visitante." />}
+            </div>
           </aside>
         </section>
 
         <section className="intelligence-secondary-grid">
-          <article className="ec-card"><div className="ec-card__header"><h2>Distribución Geográfica</h2></div><div className="intelligence-map"><MapPinned size={46}/><span>Las ubicaciones provienen de los destinos registrados</span><div className="map-hotspot map-hotspot--one"/><div className="map-hotspot map-hotspot--two"/><div className="map-hotspot map-hotspot--three"/></div></article>
-          <article className="ec-card"><div className="ec-card__header"><h2>Top destinos</h2><span className="ec-stat-card__trend">Por afluencia</span></div><div className="ec-card__body intelligence-ranking">{topDestinations.slice(0, 10).map((destination, index)=><div key={destination.id}><strong>#{index + 1} {destination.name}</strong><span>{number(destination.visits)}</span></div>)}{!isLoading && !topDestinations.length && <p>Sin métricas disponibles.</p>}</div></article>
+          <article className="ec-card">
+            <div className="ec-card__header"><div><h2>Mapa de interés por municipio</h2><small>Posición geográfica e intensidad de visitas + búsquedas</small></div><MapPinned size={18} /></div>
+            <div className="intelligence-data-map">
+              {municipalities.map((municipality) => {
+                const point = mapPosition(municipality, municipalities);
+                return (
+                  <button
+                    className={municipality.saturatedDestinations > 0 ? 'municipality-point municipality-point--alert' : 'municipality-point'}
+                    key={municipality.municipality}
+                    type="button"
+                    style={{ left: `${point.left}%`, top: `${point.top}%`, width: point.size, height: point.size, opacity: 0.55 + point.intensity * 0.45 }}
+                    title={`${municipality.municipality}: ${number(municipality.visits)} visitas, ${number(municipality.searches)} búsquedas`}
+                  >
+                    <span>{municipality.municipality}</span>
+                  </button>
+                );
+              })}
+              {!isLoading && !municipalities.length && <AnalyticsEmptyState title="Sin coordenadas disponibles" description="Registra latitud y longitud en las ubicaciones de los destinos." />}
+              <div className="intelligence-map-legend"><span><i /> Interés</span><span><i className="is-alert" /> Saturación</span></div>
+            </div>
+          </article>
+
+          <article className="ec-card">
+            <div className="ec-card__header"><h2>Destinos con mayor demanda</h2><span className="ec-badge">Visitas + búsquedas</span></div>
+            <div className="ec-card__body intelligence-ranking">
+              {topDestinations.map((destination, index) => {
+                const activity = destination.visits + destination.searches;
+                return <div key={destination.id}><p><strong>#{index + 1} {destination.name}</strong><span>{destination.municipality ?? 'Sin municipio'}</span></p><i><span style={{ width: `${Math.max(4, (activity / maxDestinationActivity) * 100)}%` }} /></i><small>{number(destination.visits)} visitas · {number(destination.searches)} búsquedas · ★ {destination.rating.toFixed(1)}</small></div>;
+              })}
+              {!isLoading && !topDestinations.length && <AnalyticsEmptyState />}
+            </div>
+          </article>
         </section>
 
         <section className="intelligence-cards-grid">
-          <article className="ec-card"><div className="ec-card__header"><h2>Contenido registrado</h2></div><div className="ec-card__body demographic-bars"><div><span>Destinos</span><i style={{height:`${Math.max(15, Math.min(100, summary?.totalDestinos ?? 0))}%`}}/><strong>{number(summary?.totalDestinos)}</strong></div><div><span>Negocios</span><i style={{height:`${Math.max(15, Math.min(100, summary?.totalNegocios ?? 0))}%`}}/><strong>{number(summary?.totalNegocios)}</strong></div><div><span>Eventos</span><i style={{height:`${Math.max(15, Math.min(100, summary?.totalEventos ?? 0))}%`}}/><strong>{number(summary?.totalEventos)}</strong></div><div><span>Reseñas</span><i style={{height:`${Math.max(15, Math.min(100, summary?.totalResenas ?? 0))}%`}}/><strong>{number(summary?.totalResenas)}</strong></div></div></article>
-          <article className="ec-card"><div className="ec-card__header"><h2>Interacción de negocio</h2></div><div className="ec-card__body budget-grid"><div><small>Favoritos totales</small><strong>{number((summary?.totalFavoritosDestinos ?? 0) + (summary?.totalFavoritosNegocios ?? 0))}</strong></div><div><small>Visualizaciones</small><strong>{number(summary?.visualizacionesNegocios)}</strong></div><div><small>Clics reserva</small><strong>{number(summary?.clicsReservaNegocios)}</strong></div></div></article>
-          <article className="ec-card"><div className="ec-card__header"><h2>Categorías activas</h2></div><div className="ec-card__body interest-tags">{(data?.categoryDistribution ?? []).map(category=><span key={category.name}>{category.name}: {category.total}</span>)}{!isLoading && !data?.categoryDistribution.length && <span>Sin categorías</span>}</div></article>
+          <article className="ec-card">
+            <div className="ec-card__header"><h2>Perfiles de visitantes</h2></div>
+            <div className="ec-card__body visitor-segments">
+              {(data?.visitorSegments ?? []).map((segment) => <div key={segment.type}><span style={{ '--segment': `${segment.percentage}%` } as React.CSSProperties}><i /></span><p><strong>{visitorLabel(segment.type)}</strong><small>{number(segment.total)} usuarios · {segment.percentage.toFixed(1)}%</small><small>Presupuesto promedio: ${number(segment.averageBudget)}</small></p></div>)}
+              {!isLoading && !data?.visitorSegments.length && <AnalyticsEmptyState title="Sin perfiles turísticos" />}
+            </div>
+          </article>
+
+          <article className="ec-card">
+            <div className="ec-card__header"><h2>Experiencias preferidas</h2></div>
+            <div className="ec-card__body analytics-bar-list analytics-bar-list--orange">
+              {(data?.interestDistribution ?? []).map((interest) => <div key={interest.name}><p><strong>{interest.name}</strong><span>{number(interest.total)}</span></p><i><span style={{ width: `${Math.max(5, (interest.total / maxInterest) * 100)}%` }} /></i></div>)}
+              {!isLoading && !data?.interestDistribution.length && <AnalyticsEmptyState title="Sin intereses registrados" />}
+            </div>
+          </article>
+
+          <article className="ec-card">
+            <div className="ec-card__header"><h2><BrainCircuit size={17} /> Resumen institucional</h2></div>
+            <div className="ec-card__body intelligence-insight-list">
+              <div><strong>Mayor interés actual</strong><p>{highest ? `${highest.name}, en ${highest.municipality ?? 'municipio no definido'}, encabeza el ranking con ${number(highest.visits)} visitas.` : 'Aún no existe afluencia suficiente para generar el indicador.'}</p></div>
+              <div><strong>Cobertura comercial</strong><p>{number(summary?.negociosVerificados)} de {number(summary?.totalNegocios)} negocios activos están verificados.</p></div>
+              <div><strong>Oferta disponible</strong><p>{number(summary?.totalDestinos)} destinos y {number(summary?.totalEventos)} eventos activos en el periodo.</p></div>
+            </div>
+          </article>
         </section>
 
-        <section className="ec-card sustainability-card"><div className="ec-card__header"><div><h2>Observaciones basadas en datos</h2><p>Sin proyecciones ni información inventada</p></div><button className="ec-button ec-button--primary" type="button" onClick={exportJson} disabled={!data}><FileText size={16}/> Descargar datos</button></div><div className="sustainability-grid"><div><span className="ec-stat-card__icon"><Sparkles size={17}/></span><strong>Destino prioritario</strong><p>{highest ? `Dar seguimiento a ${highest.name}, actualmente encabeza la afluencia.` : 'Registra afluencia para identificar destinos prioritarios.'}</p></div><div><span className="ec-stat-card__icon ec-stat-card__icon--orange"><TrendingUp size={17}/></span><strong>Destino con menor registro</strong><p>{least ? `${least.name} tiene ${number(least.visits)} visitas registradas.` : 'No existen datos suficientes.'}</p></div><div><span className="ec-stat-card__icon ec-stat-card__icon--blue"><CalendarDays size={17}/></span><strong>Agenda turística</strong><p>Actualmente hay {number(summary?.totalEventos)} eventos activos disponibles en la plataforma.</p></div></div></section>
+        <section className="ec-card analytics-opportunities">
+          <div className="ec-card__header"><div><h2>Zonas con potencial de desarrollo</h2><small>Baja afluencia y calificación alta</small></div><Sparkles size={18} /></div>
+          <div className="ec-table-wrap">
+            <table className="ec-table">
+              <thead><tr><th>Destino</th><th>Municipio</th><th>Categoría</th><th>Visitas</th><th>Calificación</th><th>Puntaje</th><th>Acción sugerida</th></tr></thead>
+              <tbody>
+                {(data?.opportunities ?? []).map((opportunity) => <tr key={opportunity.destinationId}><td><strong>{opportunity.name}</strong></td><td>{opportunity.municipality ?? 'Sin municipio'}</td><td>{opportunity.category ?? 'Sin categoría'}</td><td>{number(opportunity.visits)}</td><td className="ranking-rating">★ {opportunity.rating.toFixed(1)}</td><td><span className="ec-badge ec-badge--green">{opportunity.opportunityScore.toFixed(0)}/100</span></td><td>{opportunity.recommendation}</td></tr>)}
+                {!isLoading && !data?.opportunities.length && <tr><td colSpan={7}>No se detectaron destinos con baja afluencia y calificación mínima de 4.0 en este filtro.</td></tr>}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="ec-card sustainability-card">
+          <div className="ec-card__header"><div><h2>Turismo sostenible y redistribución</h2><small>Alertas basadas en saturación configurada o afluencia 50% superior al promedio</small></div><AlertTriangle size={18} /></div>
+          <div className="sustainability-grid">
+            {(data?.sustainabilityAlerts ?? []).map((alert) => <article key={alert.destinationId} className={`sustainability-alert sustainability-alert--${alert.level}`}><span><AlertTriangle size={16} /> Riesgo {alert.level}</span><strong>{alert.name}</strong><small>{alert.municipality ?? 'Sin municipio'} · {number(alert.visits)} visitas</small><p>{alert.recommendation}</p></article>)}
+            {!isLoading && !data?.sustainabilityAlerts.length && <div className="sustainability-ok"><Sparkles size={22} /><strong>Sin alertas de saturación</strong><p>No se identificaron destinos saturados para el periodo y región elegidos.</p></div>}
+          </div>
+        </section>
       </div>
     </PanelShell>
   );
