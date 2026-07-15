@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LoginUseCase } from '../../domain/LoginUseCase';
-import { AuthRepository } from '../../data/repository/AuthRepository';
-import { BASE_URL } from '../../../../core/shared/config/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import { LoginUseCase } from "../../domain/LoginUseCase";
+import { AuthRepository } from "../../data/repository/AuthRepository";
+import {
+  clearSession,
+  saveSession,
+} from "../../../../core/shared/utils/auth";
 
 export function useLoginViewModel() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -15,7 +19,7 @@ export function useLoginViewModel() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Ingresa tu correo y contraseña');
+      setError("Ingresa tu correo y contraseña");
       return;
     }
 
@@ -23,23 +27,42 @@ export function useLoginViewModel() {
     setIsLoading(true);
 
     try {
-      const loginUseCase = new LoginUseCase(new AuthRepository());
-      const user = await loginUseCase.execute(email, password);
+      const loginUseCase = new LoginUseCase(
+        new AuthRepository()
+      );
 
-      localStorage.setItem('token', user.token);
-      localStorage.setItem('user_name', user.name);
+      const user = await loginUseCase.execute(
+        email,
+        password
+      );
 
-      const probe = await fetch(`${BASE_URL}/stats/system`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
+      switch (user.userType) {
+        case "admin_plataforma":
+          saveSession(user);
+          navigate("/admin/dashboard", {
+            replace: true,
+          });
+          return;
 
-      if (probe.status === 200) {
-        navigate('/admin/dashboard');
-      } else {
-        navigate('/negocio/inicio');
+        case "admin_negocio":
+          saveSession(user);
+          navigate("/negocio/inicio", {
+            replace: true,
+          });
+          return;
+
+        default:
+          clearSession();
+          setError(
+            "Esta cuenta no tiene acceso al panel administrativo"
+          );
       }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+    } catch (loginError) {
+      const message =
+        loginError instanceof Error
+          ? loginError.message
+          : "Error al iniciar sesión";
+
       setError(message);
     } finally {
       setIsLoading(false);
@@ -47,9 +70,12 @@ export function useLoginViewModel() {
   };
 
   return {
-    email, setEmail,
-    password, setPassword,
-    rememberMe, setRememberMe,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    rememberMe,
+    setRememberMe,
     isLoading,
     error,
     handleLogin,

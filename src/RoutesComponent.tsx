@@ -13,18 +13,18 @@ import { ProtectedRoute } from './core/shared/components/ProtectedRoute';
 const RoutesComponent = () => {
   return (
     <Routes>
-      <Route path="/" element={<LoginPage />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/registro" element={<RegisterPage />} />
 
-      <Route path="/negocio/inicio" element={<ProtectedRoute><NegocioHomePage /></ProtectedRoute>} />
-      <Route path="/negocio/promociones" element={<ProtectedRoute><PromocionesPage /></ProtectedRoute>} />
-      <Route path="/negocio/promociones/nueva" element={<ProtectedRoute><NuevaPromocionPage /></ProtectedRoute>} />
-      <Route path="/negocio/reseñas" element={<ProtectedRoute><ReseñasPage /></ProtectedRoute>} />
+      <Route path="/negocio/inicio" element={<ProtectedRoute allowedRoles={['admin_negocio']}><NegocioHomePage /></ProtectedRoute>} />
+      <Route path="/negocio/promociones" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PromocionesPage /></ProtectedRoute>} />
+      <Route path="/negocio/promociones/nueva" element={<ProtectedRoute allowedRoles={['admin_negocio']}><NuevaPromocionPage /></ProtectedRoute>} />
+      <Route path="/negocio/reseñas" element={<ProtectedRoute allowedRoles={['admin_negocio']}><ReseñasPage /></ProtectedRoute>} />
       <Route path="/negocio/suscripcion/exito" element={<SuscripcionExito />} />
       <Route path="/negocio/suscripcion/cancelado" element={<SuscripcionCancelado />} />
 
-      <Route path="/admin/dashboard" element={<ProtectedRoute><AdminHomePage /></ProtectedRoute>} />
+      <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin_plataforma']}><AdminHomePage /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
