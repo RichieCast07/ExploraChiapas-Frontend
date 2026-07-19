@@ -1,67 +1,205 @@
-import { CalendarDays, CalendarRange, Grid2X2, List, PlusCircle, Trash2 } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-
-import { apiRequest, apiVoid } from '../../../../../core/shared/api/apiClient';
-import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
+import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
+import { Search, Bell, Plus, Pencil, Trash2, Calendar } from 'lucide-react';
+import { logout, fetchAuth } from '../../../../../core/shared/utils/auth';
+import { BASE_URL } from '../../../../../core/shared/config/api';
 import './HomeEventos.css';
 
-interface EventItem {
+interface Evento {
   id: string;
   titulo: string;
   descripcion: string | null;
+  imagenUrl: string | null;
   fechaInicio: string;
   fechaFin: string | null;
-  categoriaNombre: string | null;
   municipio: string | null;
+  categoriaNombre: string | null;
   activo: boolean;
 }
 
+const SERVER_BASE = import.meta.env.VITE_API_BASE_URL?.replace('/v1/api', '') ?? '';
+
+function resolveUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${SERVER_BASE}${url}`;
+}
+
+function estadoEvento(evento: Evento): 'programado' | 'publicado' | 'finalizado' {
+  const ahora = new Date();
+  const inicio = new Date(evento.fechaInicio);
+  const fin = evento.fechaFin ? new Date(evento.fechaFin) : null;
+  if (!evento.activo || (fin && fin < ahora)) return 'finalizado';
+  if (inicio > ahora) return 'programado';
+  return 'publicado';
+}
+
+const estadoLabel: Record<string, string> = {
+  publicado: 'Publicado',
+  programado: 'Programado',
+  finalizado: 'Finalizado',
+};
+
+const usuario = { nombre: localStorage.getItem('user_name') ?? 'Admin', rol: 'SUPER ADMINISTRADOR' };
+
 export function HomeEventos() {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [search, setSearch] = useState('');
+  const navigate = useNavigate();
+  const [eventos, setEventos] = useState<Evento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const load = async () => {
+  const cargar = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      setEvents(await apiRequest<EventItem[]>('/events', {}, false));
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No se pudieron cargar los eventos');
+      const res = await fetchAuth(`${BASE_URL}/events`);
+      const body = await res.json() as { success: boolean; data?: Evento[]; message?: string };
+      if (!res.ok || !body.success) throw new Error(body.message ?? 'Error al cargar eventos');
+      setEventos(body.data ?? []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void cargar(); }, [cargar]);
 
-  const filtered = useMemo(() => events.filter((event) => (
-    `${event.titulo} ${event.descripcion ?? ''} ${event.municipio ?? ''} ${event.categoriaNombre ?? ''}`
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  )), [events, search]);
-
-  const remove = async (event: EventItem) => {
-    if (!window.confirm(`¿Eliminar el evento “${event.titulo}”?`)) return;
+  const eliminar = async (id: string) => {
+    if (!confirm('¿Seguro que quieres eliminar este evento?')) return;
+    setDeletingId(id);
     try {
-      await apiVoid(`/events/${event.id}`, { method: 'DELETE' });
-      await load();
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : 'No se pudo eliminar el evento');
+      const res = await fetchAuth(`${BASE_URL}/events/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setEventos(prev => prev.filter(e => e.id !== id));
+      }
+    } finally {
+      setDeletingId(null);
     }
   };
 
   return (
-    <PanelShell kind="admin">
-      <div className="ec-page admin-events-page">
-        <div className="ec-page-header"><div className="ec-page-header__copy"><div className="ec-breadcrumb">Inicio <span>›</span> Eventos</div><h1 className="ec-page-title">Gestión de Eventos Turísticos</h1></div><Link className="ec-button ec-button--primary" to="/admin/eventos/nuevo"><PlusCircle size={17} /> Crear Evento</Link></div>
-        {error && <div className="ec-note" style={{ borderColor: '#ef4444', color: '#991b1b' }}>{error}</div>}
+    <div className="gestion-eventos-layout">
+      <Sidebar config={adminNavConfig} onLogout={logout} />
 
-        <section className="ec-card admin-events-filters"><div className="admin-events-filter-row"><input className="ec-input" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar evento, municipio o categoría" /><button className="ec-button" type="button" onClick={() => void load()}><CalendarRange size={16} /> Actualizar</button></div><div className="admin-events-view-switch"><button className="active" type="button"><List size={15} /> Vista Tabla</button><button type="button" disabled><Grid2X2 size={15} /> Vista Tarjetas</button><button type="button" disabled><CalendarDays size={15} /> Calendario</button></div></section>
+      <div className="gestion-eventos-layout__main">
+        <header className="ge-header">
+          <div className="ge-header__search">
+            <Search size={18} color="#9ca3af" />
+            <input type="text" placeholder="Buscar eventos..." />
+          </div>
+          <div className="ge-header__right">
+            <button className="ge-header__bell">
+              <Bell size={20} />
+            </button>
+            <div className="ge-header__user">
+              <div className="ge-header__user-info">
+                <span className="ge-header__user-name">{usuario.nombre}</span>
+                <span className="ge-header__user-role">{usuario.rol}</span>
+              </div>
+              <div className="ge-header__avatar">{usuario.nombre.charAt(0)}</div>
+            </div>
+          </div>
+        </header>
 
-        <section className="ec-card"><div className="ec-table-wrap"><table className="ec-table admin-events-table"><thead><tr><th>Evento</th><th>Categoría</th><th>Municipio</th><th>Fecha y hora</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>{filtered.map((event) => <tr key={event.id}><td><div className="ec-identity"><span className="admin-event-thumb">🎉</span><div><strong>{event.titulo}</strong><small>{event.descripcion ?? 'Sin descripción'}</small></div></div></td><td>{event.categoriaNombre ?? 'Sin categoría'}</td><td>{event.municipio ?? 'Sin municipio'}</td><td>{new Date(event.fechaInicio).toLocaleString('es-MX')}</td><td><span className="ec-badge ec-badge--green">Publicado</span></td><td><div className="admin-event-actions"><button type="button" className="danger" title="Eliminar" onClick={() => void remove(event)}><Trash2 size={15} /></button></div></td></tr>)}</tbody></table></div>{isLoading && <div className="ec-note">Cargando eventos...</div>}{!isLoading && filtered.length === 0 && <div className="ec-note">No hay eventos registrados.</div>}</section>
+        <main className="ge-content">
+          <div className="ge-breadcrumb">
+            <span>Inicio</span>
+            <span className="ge-breadcrumb__sep">›</span>
+            <span className="active">Eventos</span>
+          </div>
+
+          <div className="ge-title-row">
+            <h1>Gestión de Eventos Turísticos</h1>
+            <button className="btn-crear-evento" onClick={() => navigate('/admin/eventos/nuevo')}>
+              <Plus size={18} /> Crear Evento
+            </button>
+          </div>
+
+          {error && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', marginBottom: 16, color: '#b91c1c' }}>
+              {error}
+              <button onClick={() => void cargar()} style={{ marginLeft: 12, background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontWeight: 600 }}>Reintentar</button>
+            </div>
+          )}
+
+          <div className="ge-table-card">
+            {isLoading ? (
+              <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af' }}>Cargando eventos...</div>
+            ) : eventos.length === 0 && !error ? (
+              <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af' }}>
+                <Calendar size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
+                <p>No hay eventos registrados. Crea el primero.</p>
+              </div>
+            ) : (
+              <table className="ge-table">
+                <thead>
+                  <tr>
+                    <th>Evento</th>
+                    <th>Municipio</th>
+                    <th>Fecha inicio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {eventos.map((evento) => {
+                    const estado = estadoEvento(evento);
+                    const thumb = resolveUrl(evento.imagenUrl);
+                    return (
+                      <tr key={evento.id}>
+                        <td>
+                          <div className="ge-evento-cell">
+                            {thumb ? (
+                              <img src={thumb} alt={evento.titulo} className="ge-evento-thumb" />
+                            ) : (
+                              <div className="ge-evento-thumb" style={{ background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 11 }}>
+                                Sin img
+                              </div>
+                            )}
+                            <div>
+                              <span className="ge-evento-nombre">{evento.titulo}</span>
+                              <span className="ge-evento-desc">{evento.descripcion?.slice(0, 60) ?? ''}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{evento.municipio ?? '—'}</td>
+                        <td>{new Date(evento.fechaInicio).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                        <td>
+                          <span className={`ge-badge ge-badge--${estado}`}>
+                            {estadoLabel[estado]}
+                          </span>
+                        </td>
+                        <td>
+                          <div className="ge-actions">
+                            {estado !== 'finalizado' && (
+                              <button
+                                className="icon-btn"
+                                onClick={() => navigate(`/admin/eventos/editar/${evento.id}`)}
+                              >
+                                <Pencil size={16} />
+                              </button>
+                            )}
+                            <button
+                              className="icon-btn icon-btn--danger"
+                              disabled={deletingId === evento.id}
+                              onClick={() => void eliminar(evento.id)}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </main>
       </div>
     </PanelShell>
   );

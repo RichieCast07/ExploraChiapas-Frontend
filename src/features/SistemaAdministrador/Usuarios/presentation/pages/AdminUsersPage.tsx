@@ -1,5 +1,18 @@
-import { CalendarDays, MoreVertical, Search, ShieldCheck, UserCheck, Users, UserX } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import {
+  Search,
+  RefreshCw,
+  ShieldCheck,
+  UserCheck,
+  UserX,
+} from 'lucide-react';
+import {
+  useMemo,
+  useState,
+} from 'react';
+
+import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
+import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
+import { logout } from '../../../../../core/shared/utils/auth';
 
 import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
 import {

@@ -17,21 +17,118 @@ function formatDate(value: string | null) {
   return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
+type EstadoPromo = 'programada' | 'activa' | 'vencida' | 'inactiva';
+
+function estadoPromocion(promo: { activo: boolean; fechaInicio: string; fechaFin: string | null }): EstadoPromo {
+  if (!promo.activo) return 'inactiva';
+  const ahora = new Date();
+  const inicio = new Date(promo.fechaInicio);
+  if (inicio > ahora) return 'programada';
+  if (promo.fechaFin && new Date(promo.fechaFin) < ahora) return 'vencida';
+  return 'activa';
+}
+
+const estadoLabel: Record<EstadoPromo, string> = {
+  programada: 'Programada',
+  activa: 'Activa',
+  vencida: 'Vencida',
+  inactiva: 'Inactiva',
+};
+
 export function PromocionesPage() {
   const { promociones, isLoading, error, eliminar, recargar } = usePromocionesViewModel();
   const list = promociones.length > 0 ? promociones : fallbackPromotions;
   const isDemo = promociones.length === 0;
 
   return (
-    <PanelShell kind="business">
-      <div className="ec-page promotions-page">
-        <div className="ec-page-header">
-          <div className="ec-page-header__copy"><div className="ec-breadcrumb">Servicios <span>›</span> Promociones</div><h1 className="ec-page-title">Promociones</h1><p className="ec-page-subtitle">Crea, publica y administra las ofertas visibles en tu perfil.</p></div>
-          <div className="ec-actions"><button className="ec-button" type="button" onClick={() => void recargar()} disabled={isLoading}><RefreshCw size={16}/> Actualizar</button><Link className="ec-button ec-button--primary" to="/negocio/promociones/nueva"><Plus size={16}/> Nueva Promoción</Link></div>
-        </div>
-        {error && <div className="ec-alert">{error}. Se muestran promociones de referencia.</div>}
-        <section className="ec-stat-grid ec-stat-grid--3"><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon"><Tag size={18}/></span></div><div><div className="ec-stat-card__label">Promociones activas</div><div className="ec-stat-card__value">{list.filter((item)=>item.activo).length}</div></div></article><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--orange"><CalendarDays size={18}/></span></div><div><div className="ec-stat-card__label">Próximas a vencer</div><div className="ec-stat-card__value">1</div></div></article><article className="ec-stat-card"><div className="ec-stat-card__top"><span className="ec-stat-card__icon ec-stat-card__icon--blue"><Plus size={18}/></span></div><div><div className="ec-stat-card__label">Conversiones atribuidas</div><div className="ec-stat-card__value">214</div></div></article></section>
-        <section className="promotion-grid">{list.map((promotion)=><article className="ec-card promotion-card" key={promotion.id}><div className="promotion-card__banner"><Tag size={25}/><span className={`ec-badge ${promotion.activo?'ec-badge--green':'ec-badge--orange'}`}>{promotion.activo?'Activa':'Finalizada'}</span></div><div className="promotion-card__content"><div className="promotion-card__heading"><h2>{promotion.titulo}</h2>{promotion.precio !== null && <strong>{promotion.precio}%</strong>}</div><p>{promotion.descripcion ?? 'Sin descripción'}</p><div className="promotion-card__dates"><CalendarDays size={14}/><span>{formatDate(promotion.fechaInicio)} — {formatDate(promotion.fechaFin)}</span></div></div><footer><button className="ec-button ec-button--sm" type="button"><Pencil size={14}/> Editar</button><button className="ec-button ec-button--sm promotion-delete" type="button" disabled={isDemo} onClick={()=>void eliminar(promotion.id)}><Trash2 size={14}/> Eliminar</button></footer></article>)}<Link to="/negocio/promociones/nueva" className="promotion-create-card"><span><Plus size={26}/></span><h2>Crear Nueva Oferta</h2><p>Llega a más clientes con descuentos exclusivos por temporada.</p></Link></section>
+    <div className="promo-layout">
+      <Sidebar config={negocioNavConfig} onLogout={logout} />
+
+      <div className="promo-layout__main">
+        <header className="promo-header">
+          <h1 className="promo-header__brand">ExploraChiapas</h1>
+          <div className="promo-header__right">
+            <button className="promo-header__bell">
+              <Bell size={20} />
+            </button>
+            <div className="promo-header__divider" />
+            <div className="promo-header__user">
+              <div className="promo-header__user-info">
+                <span className="promo-header__user-name">{userName}</span>
+                <span className="promo-header__user-role">Administrador</span>
+              </div>
+              <div className="promo-header__avatar promo-header__avatar--placeholder">
+                {userName.charAt(0)}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="promo-content">
+          <div className="promo-content__top">
+            <p className="promo-content__subtitle">Gestiona tus ofertas activas y atrae a más exploradores.</p>
+            <button className="btn-primary" onClick={() => navigate('/negocio/promociones/nueva')}>
+              <Plus size={18} /> Nueva Promoción
+            </button>
+          </div>
+
+          {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
+          {isLoading && <p style={{ padding: '1rem' }}>Cargando promociones...</p>}
+
+          <div className="promo-grid">
+            {promociones.map((promo) => (
+              <div key={promo.id} className="promo-card">
+                <div className="promo-card__body">
+                  <h3>{promo.titulo}</h3>
+                  {promo.precio != null && (
+                    <span className="promo-card__badge">${promo.precio.toFixed(2)}</span>
+                  )}
+                  <p className="promo-card__desc">{promo.descripcion ?? ''}</p>
+
+                  <div className="promo-card__vigencia">
+                    <Calendar size={14} />
+                    <span>
+                      {formatFecha(promo.fechaInicio)}
+                      {promo.fechaFin ? ` — ${formatFecha(promo.fechaFin)}` : ''}
+                    </span>
+                  </div>
+
+                  <hr className="promo-card__divider" />
+
+                  <div className="promo-card__footer">
+                    {(() => {
+                      const estado = estadoPromocion(promo);
+                      return (
+                        <span className={`promo-card__status promo-card__status--${estado}`}>
+                          <i className="dot" /> {estadoLabel[estado]}
+                        </span>
+                      );
+                    })()}
+                    <div className="promo-card__actions">
+                      <button
+                        className="icon-btn icon-btn--danger"
+                        onClick={() => eliminar(promo.id)}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              className="promo-card promo-card--create"
+              onClick={() => navigate('/negocio/promociones/nueva')}
+            >
+              <div className="promo-card__create-icon">
+                <Plus size={24} />
+              </div>
+              <h3>Crear Nueva Oferta</h3>
+              <p>Llega a más clientes con descuentos exclusivos por temporada.</p>
+            </button>
+          </div>
+        </main>
       </div>
     </PanelShell>
   );

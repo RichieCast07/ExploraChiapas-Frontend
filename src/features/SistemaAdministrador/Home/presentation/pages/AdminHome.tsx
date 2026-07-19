@@ -50,9 +50,10 @@ function relativeDate(value: string): string {
 }
 
 export function AdminHomePage() {
-  const { stats, isLoading } = useAdminStatsViewModel();
+  const { stats, isLoading, error, recargar } = useAdminStatsViewModel();
   const userName = localStorage.getItem('user_name') ?? 'Admin';
 
+  const formatValue = (value: number | undefined) => {
     return value?.toLocaleString('es-MX') ?? '0';
   };
 

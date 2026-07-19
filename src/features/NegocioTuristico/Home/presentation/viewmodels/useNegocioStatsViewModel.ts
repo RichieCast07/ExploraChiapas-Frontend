@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
-
-import { apiRequest } from '../../../../../core/shared/api/apiClient';
+import { useEffect, useState } from 'react';
+import { BASE_URL } from '../../../../../core/shared/config/api';
+import { fetchAuth } from '../../../../../core/shared/utils/auth';
 
 interface Business {
   id: string;
   name: string;
+  isVerified: boolean;
 }
 
 interface BusinessStatsApi {
@@ -53,21 +54,11 @@ export function useNegocioStatsViewModel() {
       setError(null);
 
       try {
-        const negociosResponse = await fetchAuth(
-          `${BASE_URL}/businesses/mine`,
-        );
+        const negociosResponse = await fetchAuth(`${BASE_URL}/businesses/mine`);
+        const negociosBody = (await negociosResponse.json()) as ApiResponse<Negocio[]>;
 
-        const negociosBody =
-          (await negociosResponse.json()) as ApiResponse<Negocio[]>;
-
-        if (
-          !negociosResponse.ok ||
-          !negociosBody.success
-        ) {
-          throw new Error(
-            negociosBody.message ??
-              'No se pudieron cargar tus negocios',
-          );
+        if (!negociosResponse.ok || !negociosBody.success) {
+          throw new Error(negociosBody.message ?? 'No se pudieron cargar tus negocios');
         }
 
         const negocio = negociosBody.data?.[0];
@@ -77,31 +68,19 @@ export function useNegocioStatsViewModel() {
           return;
         }
 
-        const statsResponse = await fetchAuth(
-          `${BASE_URL}/stats/businesses/${negocio.id}`,
-        );
+        const statsResponse = await fetchAuth(`${BASE_URL}/stats/businesses/${negocio.id}`);
+        const statsBody = (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
 
-        const statsBody =
-          (await statsResponse.json()) as ApiResponse<ApiNegocioStats>;
-
-        if (statsBody.success) {
-          setStats({
-            negocioNombre: negocio.name,
-            totalFavoritos: statsBody.data.totalFavoritos,
-            calificacionPromedio: statsBody.data.calificacionPromedio,
-            totalResenas: statsBody.data.totalResenas,
-            isVerified: Boolean(negocio.isVerified),
-          });
-        } else {
-          setError(statsBody.message ?? 'Error al cargar estadísticas');
+        if (!statsBody.success || !statsBody.data) {
+          throw new Error(statsBody.message ?? 'Error al cargar estadísticas');
         }
 
         setStats({
           negocioNombre: negocio.name,
           totalFavoritos: statsBody.data.totalFavoritos,
-          calificacionPromedio:
-            statsBody.data.calificacionPromedio,
+          calificacionPromedio: statsBody.data.calificacionPromedio,
           totalResenas: statsBody.data.totalResenas,
+          isVerified: Boolean(negocio.isVerified),
         });
       } catch (requestError) {
         setError(
