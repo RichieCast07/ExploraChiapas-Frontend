@@ -10,6 +10,24 @@ function formatFecha(fecha: string) {
   return new Date(fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+type EstadoPromo = 'programada' | 'activa' | 'vencida' | 'inactiva';
+
+function estadoPromocion(promo: { activo: boolean; fechaInicio: string; fechaFin: string | null }): EstadoPromo {
+  if (!promo.activo) return 'inactiva';
+  const ahora = new Date();
+  const inicio = new Date(promo.fechaInicio);
+  if (inicio > ahora) return 'programada';
+  if (promo.fechaFin && new Date(promo.fechaFin) < ahora) return 'vencida';
+  return 'activa';
+}
+
+const estadoLabel: Record<EstadoPromo, string> = {
+  programada: 'Programada',
+  activa: 'Activa',
+  vencida: 'Vencida',
+  inactiva: 'Inactiva',
+};
+
 export function PromocionesPage() {
   const navigate = useNavigate();
   const { promociones, isLoading, error, eliminar } = usePromocionesViewModel();
@@ -71,9 +89,14 @@ export function PromocionesPage() {
                   <hr className="promo-card__divider" />
 
                   <div className="promo-card__footer">
-                    <span className={`promo-card__status promo-card__status--${promo.activo ? 'activa' : 'inactiva'}`}>
-                      <i className="dot" /> {promo.activo ? 'Activa' : 'Inactiva'}
-                    </span>
+                    {(() => {
+                      const estado = estadoPromocion(promo);
+                      return (
+                        <span className={`promo-card__status promo-card__status--${estado}`}>
+                          <i className="dot" /> {estadoLabel[estado]}
+                        </span>
+                      );
+                    })()}
                     <div className="promo-card__actions">
                       <button
                         className="icon-btn icon-btn--danger"

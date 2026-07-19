@@ -1,13 +1,13 @@
-
-// features/SistemaAdministrador/Eventos/presentation/pages/Eventos.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
 import { Search, Bell, Info, Map, ChevronRight, ImagePlus } from 'lucide-react';
+import { logout, fetchAuth } from '../../../../../core/shared/utils/auth';
+import { BASE_URL } from '../../../../../core/shared/config/api';
 import './Eventos.css';
 
-const usuario = { nombre: 'Admin Explora', rol: 'SUPER ADMINISTRADOR' };
+const usuario = { nombre: localStorage.getItem('user_name') ?? 'Admin', rol: 'SUPER ADMINISTRADOR' };
 
 const categorias = ['Cultural', 'Gastronómico', 'Deportivo', 'Religioso', 'Artesanal'];
 const municipios = ['San Cristóbal de las Casas', 'Tuxtla Gutiérrez', 'Palenque', 'Comitán', 'Chiapa de Corzo'];
@@ -15,16 +15,17 @@ const municipios = ['San Cristóbal de las Casas', 'Tuxtla Gutiérrez', 'Palenqu
 export function Eventos() {
   const navigate = useNavigate();
 
-  const [nombre, setNombre] = useState('');
-  const [categoria, setCategoria] = useState('');
+  const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [municipio, setMunicipio] = useState('');
-  const [fecha, setFecha] = useState('');
-  const [capacidad, setCapacidad] = useState('');
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
   const [horaFin, setHoraFin] = useState('');
   const [imagen, setImagen] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -34,18 +35,63 @@ export function Eventos() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ nombre, categoria, descripcion, municipio, fecha, capacidad, horaInicio, horaFin, imagen });
-    navigate('/admin/eventos');
+    setError(null);
+
+    if (!titulo.trim()) { setError('El título es obligatorio.'); return; }
+    if (!fechaInicio) { setError('La fecha de inicio es obligatoria.'); return; }
+
+    const fechaInicioISO = horaInicio
+      ? `${fechaInicio}T${horaInicio}:00`
+      : `${fechaInicio}T00:00:00`;
+
+    const fechaFinISO = fechaFin
+      ? (horaFin ? `${fechaFin}T${horaFin}:00` : `${fechaFin}T23:59:00`)
+      : null;
+
+    setIsLoading(true);
+    try {
+      const res = await fetchAuth(`${BASE_URL}/events`, {
+        method: 'POST',
+        body: JSON.stringify({
+          titulo: titulo.trim(),
+          descripcion: descripcion.trim() || null,
+          fechaInicio: fechaInicioISO,
+          fechaFin: fechaFinISO,
+        }),
+      });
+
+      const body = await res.json() as { success: boolean; data?: { id: string }; message?: string };
+
+      if (!res.ok || !body.success) {
+        throw new Error(body.message ?? 'No se pudo crear el evento');
+      }
+
+      const eventoId = body.data?.id;
+
+      if (imagen && eventoId) {
+        const formData = new FormData();
+        formData.append('imagen', imagen);
+        await fetchAuth(`${BASE_URL}/uploads/eventos/${eventoId}`, {
+          method: 'POST',
+          body: formData,
+        });
+      }
+
+      navigate('/admin/eventos');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error de conexión');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="evento-layout">
-      <Sidebar config={adminNavConfig} onLogout={() => console.log('logout')} />
+      <Sidebar config={adminNavConfig} onLogout={logout} />
 
       <div className="evento-layout__main">
-        {/* Header */}
         <header className="evento-header">
           <div className="evento-header__search">
             <Search size={18} color="#9ca3af" />
@@ -65,7 +111,6 @@ export function Eventos() {
           </div>
         </header>
 
-        {/* Contenido */}
         <main className="evento-content">
           <div className="evento-breadcrumb">
             <span>Panel Administrativo</span>
@@ -75,8 +120,13 @@ export function Eventos() {
             <span className="active">Nuevo Evento</span>
           </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Información General */}
+          {error && (
+            <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', marginBottom: 16, color: '#b91c1c' }}>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={(e) => { void handleSubmit(e); }}>
             <div className="evento-card">
               <div className="evento-card__header">
                 <Info size={18} />
@@ -85,27 +135,18 @@ export function Eventos() {
 
               <div className="evento-card__body">
                 <div className="form-group">
-                  <label>Nombre del evento</label>
+                  <label>Nombre del evento *</label>
                   <input
                     type="text"
                     placeholder="Ej. Festival del Café en San Cristóbal"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
+                    value={titulo}
+                    onChange={(e) => setTitulo(e.target.value)}
+                    required
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Categoría</label>
-                  <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-                    <option value="">Selecciona una categoría</option>
-                    {categorias.map((c) => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Descripción detallada</label>
+                  <label>Descripción</label>
                   <textarea
                     rows={4}
                     placeholder="Describe los aspectos más relevantes del evento para los visitantes..."
@@ -116,15 +157,14 @@ export function Eventos() {
               </div>
             </div>
 
-            {/* Logística y Ubicación */}
             <div className="evento-card">
               <div className="evento-card__header">
                 <Map size={18} />
-                <span>Logística y Ubicación</span>
+                <span>Logística y Fechas</span>
               </div>
 
               <div className="evento-card__body">
-                <div className="form-row form-row--3">
+                <div className="form-row form-row--2">
                   <div className="form-group">
                     <label>Municipio</label>
                     <select value={municipio} onChange={(e) => setMunicipio(e.target.value)}>
@@ -136,25 +176,31 @@ export function Eventos() {
                   </div>
 
                   <div className="form-group">
-                    <label>Fecha del evento</label>
-                    <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-                  </div>
-
-                  <div className="form-group">
-                    <label>Capacidad máxima</label>
-                    <input
-                      type="number"
-                      placeholder="Ej. 100"
-                      value={capacidad}
-                      onChange={(e) => setCapacidad(e.target.value)}
-                    />
+                    <label>Categoría</label>
+                    <select>
+                      <option value="">Selecciona una categoría</option>
+                      {categorias.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div className="form-row form-row--2">
                   <div className="form-group">
+                    <label>Fecha de inicio *</label>
+                    <input type="date" value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
                     <label>Hora de inicio</label>
                     <input type="time" value={horaInicio} onChange={(e) => setHoraInicio(e.target.value)} />
+                  </div>
+                </div>
+
+                <div className="form-row form-row--2">
+                  <div className="form-group">
+                    <label>Fecha de fin</label>
+                    <input type="date" value={fechaFin} onChange={(e) => setFechaFin(e.target.value)} />
                   </div>
                   <div className="form-group">
                     <label>Hora de fin</label>
@@ -164,7 +210,6 @@ export function Eventos() {
               </div>
             </div>
 
-            {/* Imagen del evento */}
             <div className="evento-card">
               <div className="evento-card__header">
                 <ImagePlus size={18} />
@@ -189,13 +234,12 @@ export function Eventos() {
               </div>
             </div>
 
-            {/* Acciones */}
             <div className="evento-actions">
-              <button type="button" className="btn-cancel" onClick={() => navigate('/admin/eventos')}>
+              <button type="button" className="btn-cancel" onClick={() => navigate('/admin/eventos')} disabled={isLoading}>
                 Cancelar
               </button>
-              <button type="submit" className="btn-save">
-                Guardar Evento
+              <button type="submit" className="btn-save" disabled={isLoading}>
+                {isLoading ? 'Guardando...' : 'Guardar Evento'}
               </button>
             </div>
           </form>
