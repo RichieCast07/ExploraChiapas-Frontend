@@ -284,7 +284,6 @@ export default function RoutesComponent() {
           </BusinessRoute>
         }
       />
-
       <Route
         path="/negocio/suscripcion/cancelado"
         element={
@@ -293,8 +292,7 @@ export default function RoutesComponent() {
           </BusinessRoute>
         }
       />
-
-      <Route path="*" element={<RootRedirect />} />
+       <Route path="*" element={<RootRedirect />} />
     </Routes>
   );
 }
