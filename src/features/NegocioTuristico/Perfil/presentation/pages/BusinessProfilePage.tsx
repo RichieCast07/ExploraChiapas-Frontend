@@ -30,7 +30,19 @@ interface Schedule {
   closed: boolean;
 }
 
-interface Service { id: string; name: string; }
+interface Service {
+  id: string;
+  name: string;
+}
+
+interface BusinessLocation {
+  id: string;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  municipality: string | null;
+  state: string | null;
+}
 
 const initialSchedules: Schedule[] = days.map((_, index) => ({
   dayOfWeek: index + 1,
@@ -52,6 +64,7 @@ export function BusinessProfilePage() {
   const [municipality, setMunicipality] = useState('');
   const [state, setState] = useState('Chiapas');
   const [services, setServices] = useState<string[]>([]);
+  const [persistedServices, setPersistedServices] = useState<Service[]>([]);
   const [newService, setNewService] = useState('');
   const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
@@ -78,16 +91,43 @@ export function BusinessProfilePage() {
       setName(selected.name);
       setDescription(selected.description ?? '');
       setPrice(selected.priceFrom?.toString() ?? '');
-      setAddress(selected.address ?? '');
-      setMunicipality(selected.municipality ?? '');
-      setState(selected.state ?? 'Chiapas');
 
-      const [loadedSchedules, loadedServices] = await Promise.all([
-        apiRequest<Schedule[]>(`/businesses/${selected.id}/schedules`).catch(() => initialSchedules),
-        apiRequest<Service[]>(`/businesses/${selected.id}/services`, {}, false).catch(() => []),
+      const [
+        loadedLocation,
+        loadedSchedules,
+        loadedServices,
+      ] = await Promise.all([
+        apiRequest<BusinessLocation>(
+          `/locations/${selected.locationId}`,
+          {},
+          false,
+        ).catch(() => null),
+
+        apiRequest<Schedule[]>(
+          `/businesses/${selected.id}/schedules`,
+        ).catch(() => initialSchedules),
+
+        apiRequest<Service[]>(
+          `/businesses/${selected.id}/services`,
+          {},
+          false,
+        ).catch(() => []),
       ]);
-      if (loadedSchedules.length) setSchedules(loadedSchedules);
-      setServices(loadedServices.map((service) => service.name));
+
+      setAddress(loadedLocation?.address ?? '');
+      setMunicipality(loadedLocation?.municipality ?? '');
+      setState(loadedLocation?.state ?? 'Chiapas');
+
+      if (loadedSchedules.length) {
+        setSchedules(loadedSchedules);
+      }
+
+      setPersistedServices(loadedServices);
+      setServices(
+        loadedServices.map(
+          (service) => service.name,
+        ),
+      );
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : 'No se pudo cargar el perfil');
     } finally {
@@ -154,10 +194,70 @@ export function BusinessProfilePage() {
         }),
       });
 
-      await apiVoid(`/businesses/${business.id}/services`, {
-        method: 'PUT',
-        body: JSON.stringify({ services: services.map((service) => ({ name: service })) }),
-      });
+      const normalizedServices = services
+        .map((service) => service.trim())
+        .filter(
+          (service, index, all) =>
+            service.length > 0 &&
+            all.findIndex(
+              (candidate) =>
+                candidate.toLowerCase() ===
+                service.toLowerCase(),
+            ) === index,
+        );
+
+      const desiredServiceNames = new Set(
+        normalizedServices.map(
+          (service) => service.toLowerCase(),
+        ),
+      );
+
+      const persistedServiceNames = new Set(
+        persistedServices.map(
+          (service) => service.name.toLowerCase(),
+        ),
+      );
+
+      const servicesToCreate =
+        normalizedServices.filter(
+          (service) =>
+            !persistedServiceNames.has(
+              service.toLowerCase(),
+            ),
+        );
+
+      const servicesToDelete =
+        persistedServices.filter(
+          (service) =>
+            !desiredServiceNames.has(
+              service.name.toLowerCase(),
+            ),
+        );
+
+      await Promise.all([
+        ...servicesToCreate.map(
+          (service) =>
+            apiRequest<Service>(
+              `/businesses/${business.id}/services`,
+              {
+                method: 'POST',
+                body: JSON.stringify({
+                  name: service,
+                }),
+              },
+            ),
+        ),
+
+        ...servicesToDelete.map(
+          (service) =>
+            apiVoid(
+              `/businesses/${business.id}/services/${service.id}`,
+              {
+                method: 'DELETE',
+              },
+            ),
+        ),
+      ]);
 
       if (coverFile) {
         const formData = new FormData();

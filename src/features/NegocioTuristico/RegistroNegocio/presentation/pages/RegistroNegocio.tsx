@@ -18,9 +18,9 @@ const serviceOptions: Record<Category, string[]> = {
 };
 
 const businessTypeByCategory: Record<Category, string> = {
-  restaurante: 'restaurante',
-  hotel: 'hotel',
-  actividad: 'actividad_turistica',
+  restaurante: 'Restaurante',
+  hotel: 'Hotel',
+  actividad: 'Operador turístico',
 };
 
 function normalizeTime(time: string): string {
@@ -147,19 +147,22 @@ export function RegistroNegocio() {
         body: JSON.stringify({ schedules }),
       });
 
-      await apiVoid(`/businesses/${business.id}/services`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          services: services.map((service) => ({ name: service })),
-        }),
-      });
-
       if (photoFiles[0]) {
         const formData = new FormData();
         formData.append('imagen', photoFiles[0]);
+
         await apiVoid(`/uploads/negocios/${business.id}`, {
           method: 'POST',
           body: formData,
+        });
+      }
+
+      for (const service of services) {
+        await apiVoid(`/businesses/${business.id}/services`, {
+          method: 'POST',
+          body: JSON.stringify({
+            name: service,
+          }),
         });
       }
 
