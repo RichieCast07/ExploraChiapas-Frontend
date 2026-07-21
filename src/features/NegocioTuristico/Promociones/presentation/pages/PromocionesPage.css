@@ -118,8 +118,12 @@
 .promo-card__status .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
 .promo-card__status--activa { color: #16a34a; }
 .promo-card__status--activa .dot { background: #16a34a; }
-.promo-card__status--pendiente { color: #ea7c2e; }
-.promo-card__status--pendiente .dot { background: #ea7c2e; }
+.promo-card__status--programada { color: #2563eb; }
+.promo-card__status--programada .dot { background: #2563eb; }
+.promo-card__status--vencida { color: #9ca3af; }
+.promo-card__status--vencida .dot { background: #9ca3af; }
+.promo-card__status--inactiva { color: #dc2626; }
+.promo-card__status--inactiva .dot { background: #dc2626; }
 
 .promo-card__actions { display: flex; gap: 8px; }
 .icon-btn {

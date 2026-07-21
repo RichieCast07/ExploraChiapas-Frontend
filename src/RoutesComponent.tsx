@@ -10,6 +10,7 @@ import { NuevaPromocionPage } from './features/NegocioTuristico/Promociones/pres
 import { ReseñasPage } from './features/NegocioTuristico/Reseñas/presentation/pages/Reseñas';
 import { RegistroNegocio } from './features/NegocioTuristico/RegistroNegocio/presentation/pages/RegistroNegocio';
 import { NegocioPerfilPage } from './features/NegocioTuristico/Perfil/presentation/pages/NegocioPerfilPage';
+import { SuscripcionPage } from './features/NegocioTuristico/Suscripcion/presentation/pages/SuscripcionPage';
 import { SuscripcionExito } from './features/NegocioTuristico/Suscripcion/presentation/pages/SuscripcionExito';
 import { SuscripcionCancelado } from './features/NegocioTuristico/Suscripcion/presentation/pages/SuscripcionCancelado';
 
@@ -24,7 +25,7 @@ import { AdminResenasPage } from './features/SistemaAdministrador/Resenas/presen
 import { AdminAnaliticaPage } from './features/SistemaAdministrador/Analitica/presentation/pages/AdminAnaliticaPage';
 import { AdminConfiguracionPage } from './features/SistemaAdministrador/Configuracion/presentation/pages/AdminConfiguracionPage';
 
-const RoutesComponent = () => {
+export default function RoutesComponent() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
@@ -39,6 +40,7 @@ const RoutesComponent = () => {
       <Route path="/negocio/reseñas" element={<ProtectedRoute allowedRoles={['admin_negocio']}><ReseñasPage /></ProtectedRoute>} />
       <Route path="/negocio/registrar" element={<ProtectedRoute allowedRoles={['admin_negocio']}><RegistroNegocio /></ProtectedRoute>} />
       <Route path="/negocio/perfil" element={<ProtectedRoute allowedRoles={['admin_negocio']}><NegocioPerfilPage /></ProtectedRoute>} />
+      <Route path="/negocio/suscripcion" element={<ProtectedRoute allowedRoles={['admin_negocio']}><SuscripcionPage /></ProtectedRoute>} />
       <Route path="/negocio/suscripcion/exito" element={<SuscripcionExito />} />
       <Route path="/negocio/suscripcion/cancelado" element={<SuscripcionCancelado />} />
 

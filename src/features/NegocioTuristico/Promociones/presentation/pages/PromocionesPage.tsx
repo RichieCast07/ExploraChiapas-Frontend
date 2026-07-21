@@ -1,19 +1,44 @@
-import { useNavigate } from 'react-router-dom';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
-import { Bell, Plus, Calendar, Trash2 } from 'lucide-react';
-import './PromocionesPage.css';
-import { usePromocionesViewModel } from '../viewmodels/usePromocionesViewModel';
-import { logout } from '../../../../../core/shared/utils/auth';
+import { CalendarDays, Pencil, Plus, RefreshCw, Tag, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-function formatFecha(fecha: string) {
-  return new Date(fecha).toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+import { PanelShell } from '../../../../../core/shared/layout/PanelShell';
+import { type Promocion, usePromocionesViewModel } from '../viewmodels/usePromocionesViewModel';
+import './PromocionesPage.css';
+
+const fallbackPromotions: Promocion[] = [
+  { id: 'demo-1', titulo: 'Temporada Verde', descripcion: '15% de descuento en reservaciones de lunes a jueves.', precio: 15, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-07-01', fechaFin: '2026-08-31', activo: true, fechaCreacion: '2026-06-25' },
+  { id: 'demo-2', titulo: 'Experiencia en Pareja', descripcion: 'Recorrido guiado y desayuno incluidos para dos personas.', precio: 20, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-07-15', fechaFin: '2026-09-15', activo: true, fechaCreacion: '2026-07-01' },
+  { id: 'demo-3', titulo: 'Escapada de Fin de Semana', descripcion: 'Promoción especial para estancias de dos noches.', precio: 10, negocioId: 'demo', negocioNombre: 'Selva Verde Resort', fechaInicio: '2026-06-01', fechaFin: '2026-07-10', activo: false, fechaCreacion: '2026-05-20' },
+];
+
+function formatDate(value: string | null) {
+  if (!value) return 'Sin límite';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 
+type EstadoPromo = 'programada' | 'activa' | 'vencida' | 'inactiva';
+
+function estadoPromocion(promo: { activo: boolean; fechaInicio: string; fechaFin: string | null }): EstadoPromo {
+  if (!promo.activo) return 'inactiva';
+  const ahora = new Date();
+  const inicio = new Date(promo.fechaInicio);
+  if (inicio > ahora) return 'programada';
+  if (promo.fechaFin && new Date(promo.fechaFin) < ahora) return 'vencida';
+  return 'activa';
+}
+
+const estadoLabel: Record<EstadoPromo, string> = {
+  programada: 'Programada',
+  activa: 'Activa',
+  vencida: 'Vencida',
+  inactiva: 'Inactiva',
+};
+
 export function PromocionesPage() {
-  const navigate = useNavigate();
-  const { promociones, isLoading, error, eliminar } = usePromocionesViewModel();
-  const userName = localStorage.getItem('user_name') ?? 'Mi Negocio';
+  const { promociones, isLoading, error, eliminar, recargar } = usePromocionesViewModel();
+  const list = promociones.length > 0 ? promociones : fallbackPromotions;
+  const isDemo = promociones.length === 0;
 
   return (
     <div className="promo-layout">
@@ -71,9 +96,14 @@ export function PromocionesPage() {
                   <hr className="promo-card__divider" />
 
                   <div className="promo-card__footer">
-                    <span className={`promo-card__status promo-card__status--${promo.activo ? 'activa' : 'inactiva'}`}>
-                      <i className="dot" /> {promo.activo ? 'Activa' : 'Inactiva'}
-                    </span>
+                    {(() => {
+                      const estado = estadoPromocion(promo);
+                      return (
+                        <span className={`promo-card__status promo-card__status--${estado}`}>
+                          <i className="dot" /> {estadoLabel[estado]}
+                        </span>
+                      );
+                    })()}
                     <div className="promo-card__actions">
                       <button
                         className="icon-btn icon-btn--danger"
@@ -100,6 +130,6 @@ export function PromocionesPage() {
           </div>
         </main>
       </div>
-    </div>
+    </PanelShell>
   );
 }
