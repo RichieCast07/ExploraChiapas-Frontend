@@ -37,8 +37,8 @@ interface PendingBusiness {
   businessTypeName: string;
   requestStatus:
     | 'pendiente'
-    | 'aprobada'
-    | 'rechazada';
+    | 'aprobado'
+    | 'rechazado';
   createdAt: string;
 }
 

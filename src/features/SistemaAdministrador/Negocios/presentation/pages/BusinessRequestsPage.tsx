@@ -16,15 +16,15 @@ interface BusinessRequest {
   municipality: string | null;
   state: string | null;
   imageUrl: string | null;
-  requestStatus: 'pendiente' | 'aprobada' | 'rechazada';
+  requestStatus: 'pendiente' | 'aprobado' | 'rechazado';
   createdAt: string;
   owner: { name: string | null; email: string | null };
 }
 
 const apiStatus: Record<RequestStatus, BusinessRequest['requestStatus']> = {
   Pendiente: 'pendiente',
-  Aprobado: 'aprobada',
-  Rechazado: 'rechazada',
+  Aprobado: 'aprobado',
+  Rechazado: 'rechazado',
 };
 
 function completeness(request: BusinessRequest): number {
@@ -75,8 +75,8 @@ export function BusinessRequestsPage() {
     }
   };
 
-  const approved = requests.filter((request) => request.requestStatus === 'aprobada').length;
-  const decided = approved + requests.filter((request) => request.requestStatus === 'rechazada').length;
+  const approved = requests.filter((request) => request.requestStatus === 'aprobado').length;
+  const decided = approved + requests.filter((request) => request.requestStatus === 'rechazado').length;
   const approvalRate = decided ? (approved / decided) * 100 : 0;
 
   return (
