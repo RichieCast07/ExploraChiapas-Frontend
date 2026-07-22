@@ -296,10 +296,24 @@ export function PromocionesPage() {
                     promotion.id
                   }
                 >
-                  <div className="promotion-card__banner">
-                    <Tag
-                      size={25}
-                    />
+                  <div
+                    className={`promotion-card__banner ${
+                      promotion.imagenUrl
+                        ? 'promotion-card__banner--image'
+                        : ''
+                    }`}
+                  >
+                    {promotion.imagenUrl ? (
+                      <img
+                        src={promotion.imagenUrl}
+                        alt={`Promoción ${promotion.titulo}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <span className="promotion-card__fallback-icon">
+                        <Tag size={28} />
+                      </span>
+                    )}
 
                     <span
                       className={`ec-badge ${
@@ -328,9 +342,7 @@ export function PromocionesPage() {
                       {promotion.precio !==
                         null && (
                         <strong>
-                          {
-                            promotion.precio
-                          }
+                          {promotion.precio}%
                         </strong>
                       )}
                     </div>

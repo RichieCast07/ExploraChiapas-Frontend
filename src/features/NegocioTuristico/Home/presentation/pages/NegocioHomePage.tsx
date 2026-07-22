@@ -237,7 +237,7 @@ export function NegocioHomePage() {
                   </strong>
 
                   <span>
-                    Suscríbete por $99 MXN al
+                    Suscríbete por $299 MXN al
                     mes para obtener la insignia
                     de negocio verificado.
                   </span>

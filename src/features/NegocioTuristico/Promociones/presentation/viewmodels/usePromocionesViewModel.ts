@@ -17,6 +17,7 @@ export interface Promocion {
   id: string;
   titulo: string;
   descripcion: string | null;
+  imagenUrl: string | null;
   precio: number | null;
   negocioId: string;
   negocioNombre: string | null;

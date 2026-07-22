@@ -1,2 +1,317 @@
-.business-register-form{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.85fr);gap:18px;align-items:start}.business-register-left,.business-register-right{display:flex;flex-direction:column;gap:15px}.business-category-options{display:flex;gap:9px;flex-wrap:wrap}.business-category-options button{height:36px;padding:0 18px;border:1px solid #dce4dc;border-radius:999px;background:#fff;color:#647065;font-size:11px;cursor:pointer}.business-category-options button.active{border-color:#278348;background:#edf8ef;color:#17783a;font-weight:700}.room-types{min-height:40px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.room-types label{font-size:10px;font-weight:400}.room-types input{accent-color:#16803a}.business-price-input{position:relative}.business-price-input>span{position:absolute;left:13px;top:50%;z-index:1;transform:translateY(-50%);color:#687269}.business-price-input input{padding-left:30px}.business-service-tags{display:flex;flex-wrap:wrap;gap:8px}.business-service-tags>span{display:flex;align-items:center;gap:5px;padding:7px 10px;border-radius:999px;background:#eef3ee;color:#5d675e;font-size:10px}.business-service-tags button{width:16px;height:16px;display:grid;place-items:center;border:0;background:transparent;color:#8b938c;cursor:pointer}.business-add-service{display:flex;align-items:center;gap:5px;margin-top:9px;border:0;background:transparent;color:#1c7d3d;font-size:11px;font-weight:700;cursor:pointer}.business-map-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:11px}.business-map-heading button{border:0;background:transparent;color:#19803d;font-size:9px;font-weight:750;cursor:pointer}.business-map-placeholder{position:relative;height:230px;border-radius:9px;background:linear-gradient(135deg,#a5c58e 0 22%,#dfd7bc 22% 76%,#8ebfa8 76%);overflow:hidden}.map-road{position:absolute;width:140%;height:16px;background:#f6f0df;transform:rotate(-35deg);left:-20%;top:45%;box-shadow:0 0 0 3px rgba(255,255,255,.5)}.map-road--two{transform:rotate(50deg);top:58%;}.business-map-placeholder>span{position:absolute;left:50%;top:48%;transform:translate(-50%,-50%);color:#116d32;filter:drop-shadow(0 2px 2px rgba(0,0,0,.2))}.business-map-hint{display:flex;align-items:center;gap:5px;margin:9px 0 0;color:#7c867d;font-size:9px}.business-coordinates{display:block;margin-top:5px;color:#9aa19b;font-size:9px}.business-gallery-title{display:block;margin-bottom:10px;font-size:11px}.business-gallery-grid{height:185px;display:grid;grid-template-columns:1.4fr 1fr;grid-template-rows:1fr 1fr;gap:8px}.business-gallery-grid label{display:grid;place-items:center;border:1px dashed #cad7cb;border-radius:8px;background:#f5f8f5;color:#6a756b;cursor:pointer;overflow:hidden}.business-gallery-grid label.main{grid-row:1/-1}.business-gallery-grid label img{width:100%;height:100%;object-fit:cover}.business-gallery-grid label span{display:grid;place-items:center}.business-gallery-grid label small{font-size:8px;font-weight:750}.business-gallery-hint{margin:9px 0 0;color:#8d958e;font-size:9px;text-align:center}.business-golden-tip{display:flex;gap:10px;padding:17px;border:1px solid #cfe0d1;border-radius:10px;background:#f0f7f1;color:#257d42}.business-golden-tip strong{font-size:11px}.business-golden-tip p{margin:5px 0 0;color:#637064;font-size:10px;line-height:1.45}.business-register-submit{grid-column:1/2;min-height:48px}.business-register-form small{color:#838d84;font-size:9px}
-@media(max-width:980px){.business-register-form{grid-template-columns:1fr}.business-register-submit{grid-column:auto}}@media(max-width:520px){.business-gallery-grid{height:240px;grid-template-columns:1fr 1fr}.business-gallery-grid label.main{grid-column:1/-1;grid-row:auto}.ec-form-grid{grid-template-columns:1fr}}
+
+.business-register-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.85fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.business-register-left,
+.business-register-right {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.business-category-options {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.business-category-options button {
+  min-height: 38px;
+  padding: 0 18px;
+  border: 1px solid var(--ec-border);
+  border-radius: 999px;
+  background: var(--ec-input-bg);
+  color: var(--ec-muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.business-category-options button.active {
+  border-color: var(--ec-green-700);
+  background: var(--ec-green-100);
+  color: var(--ec-green-700);
+  font-weight: 700;
+}
+
+.room-types {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.room-types label {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.room-types input {
+  accent-color: var(--ec-green-700);
+}
+
+.business-price-input {
+  position: relative;
+}
+
+.business-price-input > span {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+  color: var(--ec-muted);
+}
+
+.business-price-input input {
+  padding-left: 30px;
+}
+
+.business-service-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.business-service-tags > span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: var(--ec-surface-2);
+  color: var(--ec-muted);
+  font-size: 10px;
+}
+
+.business-service-tags button {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--ec-subtle);
+  cursor: pointer;
+}
+
+.business-add-service-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.business-add-service {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 13px;
+  border: 1px solid var(--ec-border);
+  border-radius: 8px;
+  background: var(--ec-card);
+  color: var(--ec-green-700);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.business-map-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 13px;
+}
+
+.business-map-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.business-map-heading strong {
+  color: var(--ec-heading);
+  font-size: 12px;
+}
+
+.business-map-heading small {
+  color: var(--ec-muted);
+  font-size: 9px;
+}
+
+.business-map-heading button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--ec-border);
+  border-radius: 8px;
+  background: var(--ec-card);
+  color: var(--ec-green-700);
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.business-location-fields {
+  margin-top: 10px;
+}
+
+.ec-location-map {
+  width: 100%;
+  height: 280px;
+  margin-top: 12px;
+  border: 1px solid var(--ec-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ec-surface-2);
+  z-index: 0;
+}
+
+.ec-map-marker {
+  background: transparent;
+  border: 0;
+}
+
+.ec-map-marker__pin {
+  width: 32px;
+  height: 38px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: #16803d;
+  border: 3px solid #fff;
+  box-shadow: 0 4px 13px rgba(0,0,0,.28);
+}
+
+.ec-map-marker__pin > span {
+  width: 10px;
+  height: 10px;
+  display: block;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.business-coordinates {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  color: var(--ec-muted);
+  font-size: 10px;
+}
+
+.business-gallery-title {
+  display: block;
+  margin-bottom: 11px;
+  color: var(--ec-heading);
+  font-size: 12px;
+}
+
+.business-main-photo {
+  height: 220px;
+  display: block;
+  overflow: hidden;
+  border: 1.5px dashed var(--ec-border);
+  border-radius: 10px;
+  background: var(--ec-surface-2);
+  cursor: pointer;
+}
+
+.business-main-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.business-main-photo__empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--ec-muted);
+}
+
+.business-main-photo__empty strong {
+  color: var(--ec-text);
+  font-size: 12px;
+}
+
+.business-main-photo__empty span {
+  font-size: 9px;
+}
+
+.business-gallery-hint {
+  margin: 9px 0 0;
+  color: var(--ec-subtle);
+  font-size: 9px;
+  text-align: center;
+}
+
+.business-golden-tip {
+  display: flex;
+  gap: 10px;
+  padding: 17px;
+  border: 1px solid color-mix(in srgb, var(--ec-green-700) 25%, var(--ec-border));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--ec-green-50) 65%, var(--ec-card));
+  color: var(--ec-green-700);
+}
+
+.business-golden-tip strong {
+  font-size: 11px;
+}
+
+.business-golden-tip p {
+  margin: 5px 0 0;
+  color: var(--ec-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.business-register-submit {
+  grid-column: 1 / -1;
+  min-height: 48px;
+}
+
+.business-register-form small {
+  color: var(--ec-muted);
+  font-size: 9px;
+}
+
+@media (max-width: 980px) {
+  .business-register-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .business-add-service-row {
+    grid-template-columns: 1fr;
+  }
+
+  .business-map-heading {
+    flex-direction: column;
+  }
+
+  .business-map-heading button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ec-location-map {
+    height: 240px;
+  }
+}

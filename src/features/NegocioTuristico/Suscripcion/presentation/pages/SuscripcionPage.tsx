@@ -154,7 +154,7 @@ export function SuscripcionPage({ isVerified = false }: SuscripcionPageProps) {
 
             <div className="plan-card__price-row">
               <span className="plan-card__currency">$</span>
-              <span className="plan-card__price">99</span>
+              <span className="plan-card__price">299</span>
               <span className="plan-card__period">MXN / mes</span>
             </div>
 
@@ -194,7 +194,7 @@ export function SuscripcionPage({ isVerified = false }: SuscripcionPageProps) {
                 ) : (
                   <>
                     <CreditCard size={16} />
-                    Suscribirme — $99 MXN/mes
+                    Suscribirme — $299 MXN/mes
                   </>
                 )}
               </button>

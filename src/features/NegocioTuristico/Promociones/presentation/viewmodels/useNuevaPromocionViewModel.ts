@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 
 import { BASE_URL } from '../../../../../core/shared/config/api';
@@ -14,6 +15,10 @@ interface Negocio {
   name: string;
 }
 
+interface CreatedPromotion {
+  id: string;
+}
+
 export function useNuevaPromocionViewModel() {
   const [titulo, setTitulo] = useState('');
   const [precio, setPrecio] = useState('');
@@ -22,12 +27,9 @@ export function useNuevaPromocionViewModel() {
   const [fechaFin, setFechaFin] = useState('');
 
   const [negocioId, setNegocioId] = useState<string | null>(null);
-  const [negocioNombre, setNegocioNombre] = useState<string | null>(
-    null,
-  );
+  const [negocioNombre, setNegocioNombre] = useState<string | null>(null);
 
-  const [isLoadingBusiness, setIsLoadingBusiness] =
-    useState(true);
+  const [isLoadingBusiness, setIsLoadingBusiness] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -74,7 +76,9 @@ export function useNuevaPromocionViewModel() {
     void cargarNegocio();
   }, []);
 
-  const publicar = async (): Promise<boolean> => {
+  const publicar = async (
+    imageFile?: File | null,
+  ): Promise<boolean> => {
     const tituloLimpio = titulo.trim();
     const descripcionLimpia = descripcion.trim();
 
@@ -110,9 +114,12 @@ export function useNuevaPromocionViewModel() {
     if (
       precioNumerico !== null &&
       (!Number.isFinite(precioNumerico) ||
-        precioNumerico < 0)
+        precioNumerico < 0 ||
+        precioNumerico > 100)
     ) {
-      setError('El precio debe ser un número válido');
+      setError(
+        'El porcentaje debe ser un número entre 0 y 100',
+      );
       return false;
     }
 
@@ -140,13 +147,37 @@ export function useNuevaPromocionViewModel() {
 
       const body = (await response
         .json()
-        .catch(() => null)) as ApiResponse<unknown> | null;
+        .catch(() => null)) as ApiResponse<CreatedPromotion> | null;
 
-      if (!response.ok || !body?.success) {
+      if (!response.ok || !body?.success || !body.data?.id) {
         throw new Error(
           body?.message ??
             'No se pudo publicar la promoción',
         );
+      }
+
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('imagen', imageFile);
+
+        const uploadResponse = await fetchAuth(
+          `${BASE_URL}/uploads/promociones/${body.data.id}`,
+          {
+            method: 'POST',
+            body: formData,
+          },
+        );
+
+        if (!uploadResponse.ok) {
+          const uploadBody = (await uploadResponse
+            .json()
+            .catch(() => null)) as ApiResponse<unknown> | null;
+
+          throw new Error(
+            uploadBody?.message ??
+              'La promoción se creó, pero no se pudo guardar su imagen',
+          );
+        }
       }
 
       return true;
