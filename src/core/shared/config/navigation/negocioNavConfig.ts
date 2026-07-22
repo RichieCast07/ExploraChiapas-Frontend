@@ -1,6 +1,5 @@
 import {
   BadgeCheck,
-  CircleHelp,
   House,
   LayoutDashboard,
   LogOut,
@@ -55,11 +54,6 @@ export const negocioNavConfig: NavConfig = {
     },
   ],
   bottom: [
-    {
-      label: 'Soporte',
-      icon: CircleHelp,
-      path: '/negocio/soporte',
-    },
     {
       label: 'Cerrar sesión',
       icon: LogOut,

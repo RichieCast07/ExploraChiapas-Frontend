@@ -85,9 +85,14 @@ export function NegocioDashboardPage() {
           </div>
 
           <div style={{ background: '#f0fdf4', borderRadius: 10, border: '1px solid #bbf7d0', padding: 20 }}>
-            <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 700, color: '#15803d' }}>Consejo</h3>
+            <h3 style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 700, color: '#15803d' }}>
+              Estado de métricas
+            </h3>
+
             <p style={{ margin: 0, fontSize: 13, color: '#16a34a' }}>
-              Los negocios verificados con más de 10 reseñas y calificación mayor a 4.0 aparecen primero en las recomendaciones del motor de IA de ExploraChiapas.
+              {stats?.isVerified
+                ? 'Las métricas mostradas se consultan directamente desde la API del negocio.'
+                : 'Las métricas completas estarán disponibles cuando el negocio esté aprobado y verificado.'}
             </p>
           </div>
         </main>

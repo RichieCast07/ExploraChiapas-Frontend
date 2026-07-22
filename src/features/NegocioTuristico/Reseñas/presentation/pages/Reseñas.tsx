@@ -1,6 +1,6 @@
 import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
 import { negocioNavConfig } from '../../../../../core/shared/config/navigation/negocioNavConfig';
-import { Bell, Star, Filter, MessageSquare } from 'lucide-react';
+import { Bell, Star } from 'lucide-react';
 import './Reseñas.css';
 import { useReseñasViewModel } from '../viewmodels/useReseñasViewModel';
 import { logout } from '../../../../../core/shared/utils/auth';
@@ -37,9 +37,6 @@ export function ReseñasPage() {
               <h2>Reseñas y Comentarios</h2>
               <p>Gestiona y responde a las opiniones de tus huéspedes en Chiapas.</p>
             </div>
-            <button className="btn-filter">
-              <Filter size={16} /> Filtrar
-            </button>
           </div>
 
           {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
@@ -117,10 +114,6 @@ export function ReseñasPage() {
 
                   {r.comentario && <p className="resena-item__comentario">{r.comentario}</p>}
 
-                  <button className="resena-item__responder">
-                    <MessageSquare size={14} />
-                    Responder
-                  </button>
                 </div>
               </div>
             ))}

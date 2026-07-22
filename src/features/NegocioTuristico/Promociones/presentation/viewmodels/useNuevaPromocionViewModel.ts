@@ -113,12 +113,13 @@ export function useNuevaPromocionViewModel() {
 
     if (
       precioNumerico !== null &&
-      (!Number.isFinite(precioNumerico) ||
-        precioNumerico < 0 ||
-        precioNumerico > 100)
+      (
+        !Number.isFinite(precioNumerico) ||
+        precioNumerico < 0
+      )
     ) {
       setError(
-        'El porcentaje debe ser un número entre 0 y 100',
+        'El precio debe ser un número mayor o igual a 0',
       );
       return false;
     }

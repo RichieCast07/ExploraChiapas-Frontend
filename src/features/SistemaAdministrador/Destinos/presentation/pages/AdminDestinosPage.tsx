@@ -1,127 +1,521 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Compass, RefreshCw } from 'lucide-react';
-import { adminNavConfig } from '../../../../../core/shared/config/navigation/adminNavConfig';
-import { Sidebar } from '../../../../../core/shared/layout/Sidebar';
-import { logout, fetchAuth } from '../../../../../core/shared/utils/auth';
-import { BASE_URL } from '../../../../../core/shared/config/api';
+import {
+  Compass,
+  RefreshCw,
+  Star,
+} from 'lucide-react';
 
-interface Destino {
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import {
+  apiRequest,
+  resolveMediaUrl,
+} from '../../../../../core/shared/api/apiClient';
+
+import {
+  PanelShell,
+} from '../../../../../core/shared/layout/PanelShell';
+
+interface Destination {
   id: string;
-  nombre: string;
-  tipo: string;
-  municipio: string;
-  calificacionPromedio: number;
-  activo: boolean;
+  name: string;
+  description: string | null;
+  categoryId: string;
+  locationId: string;
+  active: boolean;
+  createdAt: string;
+  averageRating: number;
+  totalReviews: number;
+  isSaturated: boolean;
+  imageUrl: string | null;
 }
 
-const tipoLabel: Record<string, string> = {
-  naturaleza: 'Naturaleza',
-  cultura: 'Cultura',
-  gastronomia: 'Gastronomía',
-  aventura: 'Aventura',
-  alojamiento: 'Alojamiento',
-};
+interface Category {
+  id: string;
+  nombre: string;
+}
+
+interface Location {
+  id: string;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  municipality: string | null;
+  state: string | null;
+}
+
+interface DestinationView
+  extends Destination {
+  categoryName: string;
+  municipality: string | null;
+  state: string | null;
+}
 
 export function AdminDestinosPage() {
-  const [destinos, setDestinos] = useState<Destino[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [
+    destinations,
+    setDestinations,
+  ] = useState<
+    DestinationView[]
+  >([]);
 
-  const cargar = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await fetchAuth(`${BASE_URL}/destinos?limit=100`);
-      const body = await res.json() as { success: boolean; data?: Destino[]; message?: string };
-      if (!res.ok || !body.success) throw new Error(body.message ?? 'Error al cargar destinos');
-      setDestinos(body.data ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error de conexión');
-      setDestinos([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
 
-  useEffect(() => { void cargar(); }, [cargar]);
+  const [
+    error,
+    setError,
+  ] = useState<
+    string | null
+  >(null);
+
+  const load =
+    useCallback(
+      async () => {
+        setIsLoading(
+          true,
+        );
+
+        setError(
+          null,
+        );
+
+        try {
+          const [
+            destinationData,
+            categoryData,
+          ] =
+            await Promise.all([
+              apiRequest<
+                Destination[]
+              >(
+                '/destinations?limit=100&offset=0',
+                {},
+                false,
+              ),
+
+              apiRequest<
+                Category[]
+              >(
+                '/categories?scope=destinos',
+                {},
+                false,
+              ),
+            ]);
+
+          const categoryMap =
+            new Map(
+              categoryData.map(
+                (
+                  category,
+                ) => [
+                  category.id,
+                  category.nombre,
+                ],
+              ),
+            );
+
+          const resolved =
+            await Promise.all(
+              destinationData.map(
+                async (
+                  destination,
+                ): Promise<DestinationView> => {
+                  let location:
+                    | Location
+                    | null =
+                    null;
+
+                  try {
+                    location =
+                      await apiRequest<Location>(
+                        `/locations/${destination.locationId}`,
+                        {},
+                        false,
+                      );
+                  } catch {
+                    /*
+                     * No inventar ubicación.
+                     * Si la API no puede
+                     * resolverla, se muestra
+                     * como no disponible.
+                     */
+                  }
+
+                  return {
+                    ...destination,
+
+                    categoryName:
+                      categoryMap.get(
+                        destination.categoryId,
+                      ) ??
+                      'Sin categoría',
+
+                    municipality:
+                      location
+                        ?.municipality ??
+                      null,
+
+                    state:
+                      location
+                        ?.state ??
+                      null,
+                  };
+                },
+              ),
+            );
+
+          setDestinations(
+            resolved,
+          );
+        } catch (
+          requestError
+        ) {
+          setDestinations(
+            [],
+          );
+
+          setError(
+            requestError
+              instanceof Error
+              ? requestError.message
+              : 'No se pudieron cargar los destinos',
+          );
+        } finally {
+          setIsLoading(
+            false,
+          );
+        }
+      },
+      [],
+    );
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const activeCount =
+    useMemo(
+      () =>
+        destinations.filter(
+          (
+            destination,
+          ) =>
+            destination.active,
+        ).length,
+      [destinations],
+    );
+
+  const saturatedCount =
+    useMemo(
+      () =>
+        destinations.filter(
+          (
+            destination,
+          ) =>
+            destination.isSaturated,
+        ).length,
+      [destinations],
+    );
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7f5' }}>
-      <Sidebar config={adminNavConfig} onLogout={logout} />
-      <main style={{ marginLeft: 260, minHeight: '100vh', padding: 32, fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 28 }}>
-          <div>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#16a34a', textTransform: 'uppercase', letterSpacing: 1 }}>
+    <PanelShell kind="admin">
+      <div className="ec-page">
+        <div className="ec-page-header">
+          <div className="ec-page-header__copy">
+            <div className="ec-breadcrumb">
               Gestión Turística
-            </span>
-            <h1 style={{ margin: '4px 0', fontSize: 24, fontWeight: 700 }}>Destinos</h1>
-            <p style={{ color: '#6b7280', marginTop: 4 }}>Consulta y gestiona los destinos turísticos registrados en la plataforma.</p>
+              <span>›</span>
+              Destinos
+            </div>
+
+            <h1 className="ec-page-title">
+              Destinos Turísticos
+            </h1>
+
+            <p className="ec-page-subtitle">
+              Consulta destinos
+              registrados directamente
+              desde la API de
+              ExploraChiapas.
+            </p>
           </div>
+
           <button
+            className="ec-button"
             type="button"
-            onClick={() => void cargar()}
-            disabled={isLoading}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 18px', border: '1px solid #d1d5db', borderRadius: 8, background: '#fff', cursor: 'pointer', fontWeight: 500 }}
+            disabled={
+              isLoading
+            }
+            onClick={() =>
+              void load()
+            }
           >
-            <RefreshCw size={16} />
-            Actualizar
+            <RefreshCw
+              size={16}
+            />
+
+            {isLoading
+              ? 'Actualizando...'
+              : 'Actualizar'}
           </button>
-        </header>
+        </div>
 
         {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, padding: '12px 16px', marginBottom: 16, color: '#b91c1c', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>{error}</span>
-            <button type="button" onClick={() => void cargar()} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#b91c1c', fontWeight: 600 }}>Reintentar</button>
+          <div className="ec-alert">
+            {error}
           </div>
         )}
 
-        <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', overflow: 'hidden' }}>
-          {isLoading ? (
-            <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af' }}>Cargando destinos...</div>
-          ) : destinos.length === 0 && !error ? (
-            <div style={{ padding: 48, textAlign: 'center', color: '#9ca3af' }}>
-              <Compass size={40} style={{ marginBottom: 12, opacity: 0.4 }} />
-              <p>No hay destinos registrados.</p>
+        <section className="ec-stat-grid">
+          <article className="ec-stat-card">
+            <div className="ec-stat-card__top">
+              <span className="ec-stat-card__icon">
+                <Compass
+                  size={18}
+                />
+              </span>
             </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
-                <thead>
-                  <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Nombre</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Tipo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Municipio</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Calificación</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {destinos.map((d, i) => (
-                    <tr key={d.id} style={{ borderBottom: i < destinos.length - 1 ? '1px solid #f3f4f6' : 'none' }}>
-                      <td style={{ padding: '14px 16px', fontWeight: 500 }}>{d.nombre}</td>
-                      <td style={{ padding: '14px 16px', color: '#6b7280' }}>{tipoLabel[d.tipo] ?? d.tipo}</td>
-                      <td style={{ padding: '14px 16px', color: '#6b7280' }}>{d.municipio ?? '—'}</td>
-                      <td style={{ padding: '14px 16px' }}>{d.calificacionPromedio?.toFixed(1) ?? '—'}/5</td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <span style={{
-                          padding: '3px 10px',
-                          borderRadius: 20,
-                          fontSize: 12,
-                          fontWeight: 600,
-                          background: d.activo ? '#dcfce7' : '#fee2e2',
-                          color: d.activo ? '#16a34a' : '#dc2626',
-                        }}>
-                          {d.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+            <div>
+              <div className="ec-stat-card__label">
+                Destinos cargados
+              </div>
+
+              <div className="ec-stat-card__value">
+                {isLoading
+                  ? '…'
+                  : destinations.length}
+              </div>
+            </div>
+          </article>
+
+          <article className="ec-stat-card">
+            <div>
+              <div className="ec-stat-card__label">
+                Activos
+              </div>
+
+              <div className="ec-stat-card__value">
+                {isLoading
+                  ? '…'
+                  : activeCount}
+              </div>
+            </div>
+          </article>
+
+          <article className="ec-stat-card">
+            <div>
+              <div className="ec-stat-card__label">
+                Saturados
+              </div>
+
+              <div className="ec-stat-card__value">
+                {isLoading
+                  ? '…'
+                  : saturatedCount}
+              </div>
+            </div>
+          </article>
+        </section>
+
+        <section className="ec-card">
+          <div className="ec-table-wrap">
+            <table className="ec-table">
+              <thead>
+                <tr>
+                  <th>
+                    Destino
+                  </th>
+
+                  <th>
+                    Categoría
+                  </th>
+
+                  <th>
+                    Municipio
+                  </th>
+
+                  <th>
+                    Calificación
+                  </th>
+
+                  <th>
+                    Reseñas
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {destinations.map(
+                  (
+                    destination,
+                  ) => {
+                    const imageUrl =
+                      resolveMediaUrl(
+                        destination.imageUrl,
+                      );
+
+                    return (
+                      <tr
+                        key={
+                          destination.id
+                        }
+                      >
+                        <td>
+                          <div className="ec-identity">
+                            {imageUrl ? (
+                              <img
+                                src={
+                                  imageUrl
+                                }
+                                alt={
+                                  destination.name
+                                }
+                                style={{
+                                  width:
+                                    46,
+                                  height:
+                                    46,
+                                  borderRadius:
+                                    8,
+                                  objectFit:
+                                    'cover',
+                                }}
+                              />
+                            ) : (
+                              <span className="ec-avatar">
+                                {destination.name
+                                  .charAt(
+                                    0,
+                                  )
+                                  .toUpperCase()}
+                              </span>
+                            )}
+
+                            <div>
+                              <strong>
+                                {
+                                  destination.name
+                                }
+                              </strong>
+
+                              <small>
+                                {destination.state ??
+                                  'Ubicación no disponible'}
+                              </small>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          {
+                            destination.categoryName
+                          }
+                        </td>
+
+                        <td>
+                          {destination.municipality ??
+                            '—'}
+                        </td>
+
+                        <td>
+                          <div
+                            style={{
+                              display:
+                                'flex',
+                              alignItems:
+                                'center',
+                              gap: 5,
+                            }}
+                          >
+                            <Star
+                              size={
+                                14
+                              }
+                            />
+
+                            {Number(
+                              destination.averageRating ??
+                                0,
+                            ).toFixed(
+                              1,
+                            )}
+                            /5
+                          </div>
+                        </td>
+
+                        <td>
+                          {
+                            destination.totalReviews
+                          }
+                        </td>
+
+                        <td>
+                          <div
+                            style={{
+                              display:
+                                'flex',
+                              gap: 6,
+                              flexWrap:
+                                'wrap',
+                            }}
+                          >
+                            <span
+                              className={`ec-badge ${
+                                destination.active
+                                  ? 'ec-badge--green'
+                                  : 'ec-badge--red'
+                              }`}
+                            >
+                              {destination.active
+                                ? 'Activo'
+                                : 'Inactivo'}
+                            </span>
+
+                            {destination.isSaturated && (
+                              <span className="ec-badge ec-badge--orange">
+                                Saturado
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  },
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {isLoading && (
+            <div className="ec-note">
+              Consultando
+              destinos...
             </div>
           )}
-        </div>
-      </main>
-    </div>
+
+          {!isLoading &&
+            !error &&
+            destinations.length ===
+              0 && (
+              <div className="ec-note">
+                No hay destinos
+                registrados.
+              </div>
+            )}
+        </section>
+      </div>
+    </PanelShell>
   );
 }

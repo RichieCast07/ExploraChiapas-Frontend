@@ -171,7 +171,7 @@ export function NuevaPromocionPage() {
 
             <div className="ec-field">
               <label>
-                Porcentaje de Descuento
+                Precio Promocional (MXN)
               </label>
 
               <div className="promotion-percent-input">
@@ -179,16 +179,16 @@ export function NuevaPromocionPage() {
                   className="ec-input"
                   type="number"
                   min="0"
-                  max="100"
                   value={precio}
                   onChange={(event) =>
                     setPrecio(
                       event.target.value,
                     )
                   }
-                  placeholder="15"
+                  step="0.01"
+                  placeholder="299.00"
                 />
-                <span>%</span>
+                <span>$</span>
               </div>
             </div>
 

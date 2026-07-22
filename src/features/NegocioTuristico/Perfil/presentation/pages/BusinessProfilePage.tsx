@@ -46,9 +46,9 @@ interface BusinessLocation {
 
 const initialSchedules: Schedule[] = days.map((_, index) => ({
   dayOfWeek: index + 1,
-  openingTime: '09:00',
-  closingTime: '18:00',
-  closed: index === 6,
+  openingTime: null,
+  closingTime: null,
+  closed: true,
 }));
 
 function hhmm(value: string | null): string {
@@ -62,7 +62,7 @@ export function BusinessProfilePage() {
   const [price, setPrice] = useState('');
   const [address, setAddress] = useState('');
   const [municipality, setMunicipality] = useState('');
-  const [state, setState] = useState('Chiapas');
+  const [state, setState] = useState('');
   const [services, setServices] = useState<string[]>([]);
   const [persistedServices, setPersistedServices] = useState<Service[]>([]);
   const [newService, setNewService] = useState('');
@@ -101,22 +101,22 @@ export function BusinessProfilePage() {
           `/locations/${selected.locationId}`,
           {},
           false,
-        ).catch(() => null),
+        ),
 
         apiRequest<Schedule[]>(
           `/businesses/${selected.id}/schedules`,
-        ).catch(() => initialSchedules),
+        ),
 
         apiRequest<Service[]>(
           `/businesses/${selected.id}/services`,
           {},
           false,
-        ).catch(() => []),
+        ),
       ]);
 
-      setAddress(loadedLocation?.address ?? '');
-      setMunicipality(loadedLocation?.municipality ?? '');
-      setState(loadedLocation?.state ?? 'Chiapas');
+      setAddress(loadedLocation.address ?? '');
+      setMunicipality(loadedLocation.municipality ?? '');
+      setState(loadedLocation.state ?? '');
 
       if (loadedSchedules.length) {
         setSchedules(loadedSchedules);

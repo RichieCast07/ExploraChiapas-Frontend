@@ -237,7 +237,7 @@ export function AdminHomePage() {
               to="/admin/destinos"
             >
               <MapPinPlus size={16} />
-              Nuevo destino
+              Ver destinos
             </Link>
           </div>
         </div>
@@ -640,11 +640,11 @@ export function AdminHomePage() {
 
                 <span>
                   <strong>
-                    Registrar destino
+                    Ver destinos
                   </strong>
 
                   <small>
-                    Añadir punto de interés
+                    Consultar registros
                   </small>
                 </span>
 
@@ -701,17 +701,6 @@ export function AdminHomePage() {
               </Link>
             </div>
 
-            <div className="system-status">
-              <span>
-                ESTADO DEL SISTEMA
-              </span>
-
-              <p>
-                <i />
-                API y base de datos
-                disponibles
-              </p>
-            </div>
           </aside>
         </section>
       </div>

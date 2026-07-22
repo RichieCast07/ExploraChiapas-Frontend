@@ -18,14 +18,12 @@ import { SuscripcionExito } from './features/NegocioTuristico/Suscripcion/presen
 import { SuscripcionPage } from './features/NegocioTuristico/Suscripcion/presentation/pages/SuscripcionPage';
 
 import { AdminAnaliticaPage } from './features/SistemaAdministrador/Analitica/presentation/pages/AdminAnaliticaPage';
-import { AdminConfiguracionPage } from './features/SistemaAdministrador/Configuracion/presentation/pages/AdminConfiguracionPage';
 import { AdminDestinosPage } from './features/SistemaAdministrador/Destinos/presentation/pages/AdminDestinosPage';
 import { Eventos } from './features/SistemaAdministrador/Eventos/presentation/pages/Eventos';
 import { HomeEventos } from './features/SistemaAdministrador/Eventos/presentation/pages/HomeEventos';
 import { AdminHomePage } from './features/SistemaAdministrador/Home/presentation/pages/AdminHome';
 import { AdminModeracionPage } from './features/SistemaAdministrador/Moderacion/presentation/pages/AdminModeracionPage';
 import { AdminNegociosPage } from './features/SistemaAdministrador/Negocios/presentation/pages/AdminNegociosPage';
-import { AdminResenasPage } from './features/SistemaAdministrador/Resenas/presentation/pages/AdminResenasPage';
 import { AdminUsersPage } from './features/SistemaAdministrador/Usuarios/presentation/pages/AdminUsersPage';
 
 export default function RoutesComponent() {
@@ -197,28 +195,10 @@ export default function RoutesComponent() {
       />
 
       <Route
-        path="/admin/resenas"
-        element={
-          <ProtectedRoute allowedRoles={['admin_plataforma']}>
-            <AdminResenasPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/admin/analitica"
         element={
           <ProtectedRoute allowedRoles={['admin_plataforma']}>
             <AdminAnaliticaPage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/admin/configuracion"
-        element={
-          <ProtectedRoute allowedRoles={['admin_plataforma']}>
-            <AdminConfiguracionPage />
           </ProtectedRoute>
         }
       />

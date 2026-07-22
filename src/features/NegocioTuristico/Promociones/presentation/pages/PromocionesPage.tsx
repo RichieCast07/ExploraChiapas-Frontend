@@ -1,6 +1,5 @@
 import {
   CalendarDays,
-  Pencil,
   Plus,
   RefreshCw,
   Tag,
@@ -45,6 +44,18 @@ function formatDate(
       year: 'numeric',
     },
   ).format(date);
+}
+
+function formatCurrency(
+  value: number,
+): string {
+  return new Intl.NumberFormat(
+    'es-MX',
+    {
+      style: 'currency',
+      currency: 'MXN',
+    },
+  ).format(value);
 }
 
 type PromotionStatus =
@@ -342,7 +353,9 @@ export function PromocionesPage() {
                       {promotion.precio !==
                         null && (
                         <strong>
-                          {promotion.precio}%
+                          {formatCurrency(
+                            promotion.precio,
+                          )}
                         </strong>
                       )}
                     </div>
