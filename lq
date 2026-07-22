@@ -1,0 +1,11 @@
+* [33m32e00ae[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/integracion/luis[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mintegracion/luis[m[33m)[m fix: alinear estados de solicitudes de negocio
+* [33m1d8202f[m cambios en elos admins
+*   [33mcdbccb6[m Merge pull request #16 from RichieCast07/develop
+[32m|[m[33m\[m  
+[32m|[m *   [33m45f6450[m[33m ([m[1;31morigin/develop[m[33m)[m Merge pull request #15 from RichieCast07/richie
+[32m|[m [34m|[m[35m\[m  
+[32m|[m [34m|[m * [33ma1ddafe[m[33m ([m[1;31morigin/richie[m[33m)[m feat: agregar pagina de suscripcion con planes y flujo de pago Stripe
+[32m|[m [34m|[m[32m/[m  
+[32m|[m[32m/[m[34m|[m   
+* [34m|[m   [33m2311305[m Merge branch 'richie'
+[36m|[m[1;31m\[m [34m\[m  
