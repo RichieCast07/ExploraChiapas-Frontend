@@ -6,6 +6,7 @@ import {
   Compass,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Users,
 } from 'lucide-react';
 
@@ -22,6 +23,7 @@ export const adminNavConfig: NavConfig = {
           icon: LayoutDashboard,
           path: '/admin/dashboard',
         },
+
         {
           label: 'Gestión de Usuarios',
           icon: Users,
@@ -39,6 +41,13 @@ export const adminNavConfig: NavConfig = {
           icon: Compass,
           path: '/admin/destinos',
         },
+
+        {
+          label: 'Recomendaciones',
+          icon: MapPin,
+          path: '/admin/recomendaciones',
+        },
+
         {
           label: 'Negocios',
           icon: BriefcaseBusiness,
@@ -56,14 +65,17 @@ export const adminNavConfig: NavConfig = {
           icon: CalendarDays,
           path: '/admin/eventos',
         },
+
         {
           label: 'Alertas y Moderación',
           icon: Ban,
           path: '/admin/moderacion',
         },
+
         {
           label:
             'Analítica e Inteligencia Turística',
+
           icon: BarChart3,
           path: '/admin/analitica',
         },

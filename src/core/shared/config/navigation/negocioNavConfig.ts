@@ -1,5 +1,6 @@
 import {
   BadgeCheck,
+  Crown,
   House,
   LayoutDashboard,
   LogOut,
@@ -40,6 +41,11 @@ export const negocioNavConfig: NavConfig = {
           label: 'Negocios',
           icon: Store,
           path: '/negocio/negocios',
+        },
+        {
+          label: 'Inteligencia Premium',
+          icon: Crown,
+          path: '/negocio/inteligencia',
         },
         {
           label: 'Suscripción',

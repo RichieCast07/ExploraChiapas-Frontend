@@ -20,6 +20,8 @@ import {
   useAdminStatsViewModel,
 } from '../../../Home/presentation/viewmodels/useAdminStatsViewModel';
 
+import './AdminAnaliticaPage.css';
+
 interface ClusterInfo {
   cluster: number;
   label: string;
@@ -92,10 +94,7 @@ export function AdminAnaliticaPage() {
           setClusters([]);
 
           setMlError(
-            requestError
-              instanceof Error
-              ? requestError.message
-              : 'No se pudo conectar con el motor de análisis',
+            'El motor de inteligencia no está disponible en este momento. Las estadísticas principales continúan funcionando correctamente.',
           );
         } finally {
           setMlLoading(
@@ -120,7 +119,7 @@ export function AdminAnaliticaPage() {
 
   return (
     <PanelShell kind="admin">
-      <div className="ec-page">
+      <div className="ec-page admin-analytics-page">
         <div className="ec-page-header">
           <div className="ec-page-header__copy">
             <div className="ec-breadcrumb">
@@ -246,7 +245,33 @@ export function AdminAnaliticaPage() {
           </article>
         </section>
 
-        <section className="ec-card">
+        <section className="admin-analytics-secondary">
+          <article>
+            <span>Negocios registrados</span>
+            <strong>{statsLoading ? '…' : (stats?.totalNegocios ?? '—')}</strong>
+            <small>{stats?.negociosVerificados ?? 0} verificados</small>
+          </article>
+
+          <article>
+            <span>Rutas generadas</span>
+            <strong>{statsLoading ? '…' : (stats?.totalRutas ?? '—')}</strong>
+            <small>Itinerarios guardados</small>
+          </article>
+
+          <article>
+            <span>Reseñas registradas</span>
+            <strong>{statsLoading ? '…' : (stats?.totalResenas ?? '—')}</strong>
+            <small>Opiniones de la comunidad</small>
+          </article>
+
+          <article>
+            <span>Favoritos de negocios</span>
+            <strong>{statsLoading ? '…' : (stats?.totalFavoritosNegocios ?? '—')}</strong>
+            <small>Interacciones guardadas</small>
+          </article>
+        </section>
+
+        <section className="ec-card admin-analytics-ml-card">
           <div className="ec-card__header">
             <div>
               <h2>
@@ -273,8 +298,17 @@ export function AdminAnaliticaPage() {
             )}
 
             {mlError && (
-              <div className="ec-alert">
-                {mlError}
+              <div className="admin-analytics-ml-offline">
+                <div>
+                  <strong>Motor ML temporalmente no disponible</strong>
+                  <p>{mlError}</p>
+                  <small>Este servicio es independiente de la API principal de ExploraChiapas.</small>
+                </div>
+
+                <button type="button" onClick={() => void loadClusters()}>
+                  <RefreshCw size={15} />
+                  Reintentar conexión
+                </button>
               </div>
             )}
 

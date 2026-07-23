@@ -70,6 +70,7 @@ export function Eventos() {
       municipality: '',
       address: '',
       date: '',
+      endDate: '',
       startTime: '10:00',
       endTime: '18:00',
       latitude: '16.7538',
@@ -209,6 +210,65 @@ export function Eventos() {
     setError(null);
 
     try {
+      const effectiveEndDate =
+        form.endDate ||
+        form.date;
+
+      if (
+        !form.date ||
+        !effectiveEndDate
+      ) {
+        throw new Error(
+          'Selecciona la fecha de inicio y la fecha de fin.',
+        );
+      }
+
+      const start =
+        new Date(
+          `${form.date}T${form.startTime}:00`,
+        );
+
+      const end =
+        new Date(
+          `${effectiveEndDate}T${form.endTime}:00`,
+        );
+
+      if (
+        Number.isNaN(
+          start.getTime(),
+        ) ||
+        Number.isNaN(
+          end.getTime(),
+        )
+      ) {
+        throw new Error(
+          'La fecha u hora seleccionada no es válida.',
+        );
+      }
+
+      if (
+        end <=
+        start
+      ) {
+        if (
+          effectiveEndDate ===
+          form.date
+        ) {
+          throw new Error(
+            'La hora de fin debe ser posterior a la hora de inicio. Si el evento termina después de medianoche, selecciona el día siguiente como fecha de fin.',
+          );
+        }
+
+        throw new Error(
+          'La fecha y hora de fin deben ser posteriores a la fecha y hora de inicio.',
+        );
+      }
+
+      /*
+       * Solo creamos la ubicación cuando
+       * todo el formulario ya pasó las
+       * validaciones locales.
+       */
       const location =
         await apiRequest<Location>(
           '/locations',
@@ -233,16 +293,6 @@ export function Eventos() {
               mapProvider: 'openstreetmap',
             }),
           },
-        );
-
-      const start =
-        new Date(
-          `${form.date}T${form.startTime}:00`,
-        );
-
-      const end =
-        new Date(
-          `${form.date}T${form.endTime}:00`,
         );
 
       const createdEvent =
@@ -460,7 +510,7 @@ export function Eventos() {
 
               <div className="ec-field">
                 <label>
-                  Fecha del evento
+                  Fecha de inicio
                 </label>
 
                 <input
@@ -468,10 +518,48 @@ export function Eventos() {
                   type="date"
                   required
                   value={form.date}
+                  onChange={(event) => {
+                    const nextDate =
+                      event.target.value;
+
+                    setForm({
+                      ...form,
+
+                      date:
+                        nextDate,
+
+                      endDate:
+                        !form.endDate ||
+                        form.endDate <
+                          nextDate
+                          ? nextDate
+                          : form.endDate,
+                    });
+                  }}
+                />
+              </div>
+
+              <div className="ec-field">
+                <label>
+                  Fecha de fin
+                </label>
+
+                <input
+                  className="ec-input"
+                  type="date"
+                  required
+                  min={
+                    form.date ||
+                    undefined
+                  }
+                  value={
+                    form.endDate
+                  }
                   onChange={(event) =>
                     setForm({
                       ...form,
-                      date:
+
+                      endDate:
                         event.target
                           .value,
                     })

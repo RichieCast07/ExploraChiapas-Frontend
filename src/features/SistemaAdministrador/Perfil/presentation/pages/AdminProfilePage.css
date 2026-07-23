@@ -1,12 +1,114 @@
-.admin-profile-main-grid { display: grid; grid-template-columns: minmax(240px,.55fr) minmax(0,1.45fr); gap: 18px; }
-.admin-profile-summary { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 28px 20px; text-align: center; }
-.admin-profile-photo { width: 100px; height: 100px; display: grid; place-items: center; padding: 5px; border: 4px solid #4db66b; border-radius: 50%; background: #e4f3e8; }
-.admin-profile-photo span { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%; color: #fff; background: linear-gradient(145deg,#548b67,#234e32); font-size: 34px; font-weight: 800; }
-.admin-profile-summary h2 { margin: 2px 0 0; font-size: 20px; }.admin-profile-summary small { color: var(--ec-muted); font-size: 10px; }.admin-profile-photo-button { width: 100%; margin-top: 12px; color: #17783a; border-color: #4f9b63; }
-.admin-profile-bottom-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
-.admin-security-list { display: flex; flex-direction: column; gap: 14px; }.admin-security-row { min-height: 68px; display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 12px; border-radius: 9px; background: var(--ec-surface-2); }.admin-security-icon { width: 34px; height: 34px; display: grid; place-items:center; border: 1px solid var(--ec-border); border-radius: 8px; color: #1b8040; background: var(--ec-card); }.admin-security-row strong,.admin-security-row small { display:block; }.admin-security-row strong { font-size: 11px; }.admin-security-row small { margin-top:3px;color:var(--ec-muted);font-size:9px; }.admin-security-row>button:not(.profile-toggle){border:0;background:transparent;color:#268047;font-size:10px;font-weight:700;cursor:pointer;}
-.profile-toggle { width: 38px; height: 22px; padding: 2px; border: 0; border-radius: 999px; background: #cbd4cc; cursor:pointer; }.profile-toggle span { display:block;width:18px;height:18px;border-radius:50%;background: var(--ec-card);box-shadow:0 1px 4px rgba(0,0,0,.18);transition:.18s;}.profile-toggle.active{background:#18803c}.profile-toggle.active span{transform:translateX(16px)}
-.admin-permission-intro { margin: 0 0 13px; color: var(--ec-muted); font-size: 10px; }.admin-permission-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}.admin-permission-grid>div{min-height:48px;display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--ec-border);border-radius:8px;background:var(--ec-surface-2);color:#247c42;font-size:10px}.admin-permission-grid>div.disabled{color:#9ba29b;background:var(--ec-surface-2)}
-.admin-profile-logout{display:flex;justify-content:flex-end}
-@media(max-width:900px){.admin-profile-main-grid,.admin-profile-bottom-grid{grid-template-columns:1fr}.admin-profile-summary{max-width:none}}
-@media(max-width:520px){.admin-permission-grid{grid-template-columns:1fr}.admin-security-row{grid-template-columns:auto 1fr}.admin-security-row>:last-child{grid-column:2;justify-self:start}}
+
+.admin-profile-page { padding-bottom: 40px; }
+.admin-profile-page .ec-page-header { margin-bottom: 22px; }
+.admin-profile-page .ec-page-subtitle { max-width: 700px; }
+.admin-profile-role {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 11px;
+  border: 1px solid color-mix(in srgb, var(--ec-green-700) 25%, var(--ec-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ec-green-700) 8%, var(--ec-card));
+  color: var(--ec-green-700); font-size: 9px; font-weight: 750;
+}
+.admin-profile-message {
+  display: flex; align-items: center; gap: 9px; margin-bottom: 14px; padding: 11px 13px;
+  border-radius: 10px; font-size: 9.5px; font-weight: 650;
+}
+.admin-profile-message--ok {
+  border: 1px solid color-mix(in srgb, var(--ec-green-700) 25%, var(--ec-border));
+  background: color-mix(in srgb, var(--ec-green-700) 7%, var(--ec-card));
+  color: var(--ec-green-700);
+}
+.admin-profile-message--error {
+  border: 1px solid color-mix(in srgb, var(--ec-red-600) 25%, var(--ec-border));
+  background: color-mix(in srgb, var(--ec-red-600) 7%, var(--ec-card));
+  color: var(--ec-red-600);
+}
+.admin-profile-loading {
+  min-height: 300px; display: grid; place-items: center;
+  border: 1px solid var(--ec-border); border-radius: 14px; background: var(--ec-card); color: var(--ec-muted);
+}
+.admin-profile-grid {
+  display: grid; grid-template-columns: minmax(250px, 330px) minmax(0, 1fr); gap: 16px; align-items: start;
+}
+.admin-profile-card {
+  border: 1px solid var(--ec-border); border-radius: 15px; background: var(--ec-card); box-shadow: var(--ec-shadow);
+}
+.admin-profile-identity {
+  display: flex; flex-direction: column; align-items: center; padding: 25px 20px; text-align: center;
+}
+.admin-profile-avatar {
+  position: relative; width: 108px; height: 108px; display: grid; place-items: center; overflow: hidden;
+  border: 4px solid var(--ec-card); border-radius: 50%;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--ec-green-700) 78%, white), var(--ec-green-700));
+  color: white; box-shadow: 0 0 0 1px var(--ec-border), 0 13px 30px color-mix(in srgb, var(--ec-green-700) 18%, transparent);
+  font-size: 32px; font-weight: 800;
+}
+.admin-profile-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.admin-profile-identity > strong { margin-top: 15px; color: var(--ec-heading); font-size: 16px; }
+.admin-profile-identity > small { margin-top: 3px; color: var(--ec-muted); font-size: 9px; }
+.admin-profile-photo-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 18px; }
+.admin-profile-photo-actions label,
+.admin-profile-photo-actions button {
+  min-height: 38px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 9px; font-size: 8.5px; font-weight: 700; cursor: pointer;
+}
+.admin-profile-photo-actions label { border: 1px solid var(--ec-green-700); background: var(--ec-green-700); color: white; }
+.admin-profile-photo-actions button { border: 1px solid var(--ec-border); background: var(--ec-card); color: var(--ec-red-600); }
+.admin-profile-meta {
+  width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px;
+  margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--ec-border); text-align: left;
+}
+.admin-profile-meta span { color: var(--ec-muted); font-size: 8px; }
+.admin-profile-meta strong { color: var(--ec-text); font-size: 8.5px; }
+.admin-profile-form { overflow: hidden; }
+.admin-profile-form-title {
+  display: flex; align-items: center; gap: 10px; padding: 17px 19px; border-bottom: 1px solid var(--ec-border); color: var(--ec-green-700);
+}
+.admin-profile-form-title h2 { margin: 0; color: var(--ec-heading); font-size: 13px; }
+.admin-profile-form-title p { margin: 3px 0 0; color: var(--ec-muted); font-size: 8.5px; }
+.admin-profile-fields { display: grid; gap: 16px; padding: 20px; }
+.admin-profile-fields label { display: grid; gap: 6px; }
+.admin-profile-fields label > span { color: var(--ec-heading); font-size: 9px; font-weight: 700; }
+.admin-profile-fields label > div {
+  min-height: 43px; display: flex; align-items: center; gap: 9px; padding: 0 12px;
+  border: 1px solid var(--ec-border); border-radius: 10px; background: var(--ec-surface-2); color: var(--ec-muted);
+}
+.admin-profile-fields label > div:focus-within {
+  border-color: color-mix(in srgb, var(--ec-green-700) 55%, var(--ec-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ec-green-700) 9%, transparent);
+}
+.admin-profile-fields input { width: 100%; border: 0; outline: 0; background: transparent; color: var(--ec-text); font: inherit; font-size: 10.5px; }
+.admin-profile-fields small { color: var(--ec-muted); font-size: 8px; }
+.admin-profile-form footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 14px 20px;
+  border-top: 1px solid var(--ec-border); background: var(--ec-surface-2);
+}
+.admin-profile-form footer > span { color: var(--ec-muted); font-size: 8px; }
+.admin-profile-form footer button {
+  min-height: 40px; display: inline-flex; align-items: center; gap: 7px; padding: 0 14px;
+  border: 1px solid var(--ec-green-700); border-radius: 9px; background: var(--ec-green-700);
+  color: white; font-size: 9px; font-weight: 750; cursor: pointer;
+}
+@media (max-width: 850px) {
+  .admin-profile-grid { grid-template-columns: 1fr; }
+}
+
+
+/* Botones de fotografía del perfil */
+.admin-profile-photo-actions {
+  width: 100%;
+}
+
+.admin-profile-photo-actions:has(label:only-child) {
+  grid-template-columns: 1fr;
+}
+
+.admin-profile-photo-actions label {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-profile-photo-actions button {
+  width: 100%;
+  box-sizing: border-box;
+}

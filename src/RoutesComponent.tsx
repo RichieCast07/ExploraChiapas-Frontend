@@ -7,6 +7,7 @@ import RegisterPage from './features/Auth/presentation/pages/Register/Register';
 
 import { NegocioDashboardPage } from './features/NegocioTuristico/Dashboard/presentation/pages/NegocioDashboardPage';
 import { NegocioHomePage } from './features/NegocioTuristico/Home/presentation/pages/NegocioHomePage';
+import { PremiumIntelligencePage } from './features/NegocioTuristico/InteligenciaPremium/presentation/pages/PremiumIntelligencePage';
 import { BusinessProfilePage } from './features/NegocioTuristico/Perfil/presentation/pages/BusinessProfilePage';
 import { NegocioPerfilPage } from './features/NegocioTuristico/Perfil/presentation/pages/NegocioPerfilPage';
 import { NuevaPromocionPage } from './features/NegocioTuristico/Promociones/presentation/pages/FormularioPromociones';
@@ -25,7 +26,9 @@ import { HomeEventos } from './features/SistemaAdministrador/Eventos/presentatio
 import { AdminHomePage } from './features/SistemaAdministrador/Home/presentation/pages/AdminHome';
 import { AdminModeracionPage } from './features/SistemaAdministrador/Moderacion/presentation/pages/AdminModeracionPage';
 import { AdminNegociosPage } from './features/SistemaAdministrador/Negocios/presentation/pages/AdminNegociosPage';
+import { AdminRecomendacionesPage } from './features/SistemaAdministrador/Recomendaciones/presentation/pages/AdminRecomendacionesPage';
 import { AdminUsersPage } from './features/SistemaAdministrador/Usuarios/presentation/pages/AdminUsersPage';
+import { AdminProfilePage } from './features/SistemaAdministrador/Perfil/presentation/pages/AdminProfilePage';
 
 export default function RoutesComponent() {
   return (
@@ -131,6 +134,14 @@ export default function RoutesComponent() {
         }
       />
 
+
+      <Route path="/negocio/inteligencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/reportes" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/tendencias" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/oportunidades" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/audiencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/sostenibilidad" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+
       <Route
         path="/negocio/suscripcion"
         element={
@@ -170,10 +181,29 @@ export default function RoutesComponent() {
       />
 
       <Route
+        path="/admin/perfil"
+        element={
+          <ProtectedRoute allowedRoles={['admin_plataforma']}>
+            <AdminProfilePage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/admin/destinos"
         element={
           <ProtectedRoute allowedRoles={['admin_plataforma']}>
             <AdminDestinosPage />
+          </ProtectedRoute>
+        }
+      />
+
+
+      <Route
+        path="/admin/recomendaciones"
+        element={
+          <ProtectedRoute allowedRoles={['admin_plataforma']}>
+            <AdminRecomendacionesPage />
           </ProtectedRoute>
         }
       />

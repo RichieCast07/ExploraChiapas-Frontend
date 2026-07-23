@@ -61,6 +61,7 @@ interface UserProfile {
   name: string;
   email?: string;
   phone?: string | null;
+  imgUrl?: string | null;
 
   alias?: string | null;
 
@@ -104,10 +105,6 @@ export function PanelShell({
     );
 
   useEffect(() => {
-    if (isAdmin) {
-      return;
-    }
-
     apiRequest<UserProfile>(
       '/users/profile',
     )
@@ -125,9 +122,36 @@ export function PanelShell({
         // La cabecera sigue funcionando
         // con los datos locales.
       });
-  }, [isAdmin]);
+  }, []);
+
+  useEffect(() => {
+    const handleProfileUpdated = (
+      event: Event,
+    ) => {
+      const customEvent =
+        event as CustomEvent<UserProfile>;
+
+      if (customEvent.detail) {
+        setProfile(
+          customEvent.detail,
+        );
+      }
+    };
+
+    window.addEventListener(
+      'ec-profile-updated',
+      handleProfileUpdated,
+    );
+
+    return () =>
+      window.removeEventListener(
+        'ec-profile-updated',
+        handleProfileUpdated,
+      );
+  }, []);
 
   const rawAvatar =
+    profile?.imgUrl ??
     profile?.imageProfileUrl ??
     profile?.profileImageUrl ??
     profile?.imagenPerfilUrl ??
@@ -221,7 +245,11 @@ export function PanelShell({
             <div className="panel-topbar__separator" />
 
             {isAdmin ? (
-              <div className="panel-user">
+              <Link
+                className="panel-user"
+                to="/admin/perfil"
+                title="Abrir mi perfil"
+              >
                 <span className="panel-user__text">
                   <strong>
                     {userName}
@@ -233,9 +261,18 @@ export function PanelShell({
                 </span>
 
                 <span className="panel-user__avatar">
-                  {initial}
+                  <span>
+                    {initial}
+                  </span>
+
+                  {avatarUrl && (
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                    />
+                  )}
                 </span>
-              </div>
+              </Link>
             ) : (
               <div className="panel-account">
                 <button
