@@ -142,7 +142,7 @@
 }
 
 .plan-card__icon--muted {
-  background: #f1f3f1;
+  background: var(--ec-surface-2);
   color: var(--ec-muted);
 }
 
@@ -226,7 +226,7 @@
 }
 
 .plan-card__check--muted {
-  background: #f1f3f1;
+  background: var(--ec-surface-2);
   color: #aab2aa;
 }
 

@@ -87,7 +87,7 @@ export function ReseñasPage() {
             </div>
 
             {!isLoading && resenas.length === 0 && !error && (
-              <p style={{ padding: '1rem', color: '#9ca3af' }}>Aún no tienes reseñas.</p>
+              <p style={{ padding: '1rem', color: 'var(--ec-subtle)' }}>Aún no tienes reseñas.</p>
             )}
 
             {resenas.map((r) => (

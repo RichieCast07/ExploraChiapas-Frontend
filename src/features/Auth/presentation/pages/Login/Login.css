@@ -4,14 +4,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #eef3ee;
+  background-color: var(--ec-surface-2);
   padding: 24px 16px;
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* ── Card ── */
 .login-card {
-  background: #ffffff;
+  background: var(--ec-card);
   border-radius: 20px;
   width: 100%;
   max-width: 400px;
@@ -41,7 +41,7 @@
 }
 .login-subtitle {
   font-size: 0.85rem;
-  color: #9e9e9e;
+  color: var(--ec-subtle);
   margin: 0;
   letter-spacing: 0.3px;
 }
@@ -49,7 +49,7 @@
 /* ── Divider ── */
 .login-divider {
   height: 1px;
-  background: #f0f0f0;
+  background: var(--ec-surface-2);
 }
 
 /* ── Form ── */
@@ -79,7 +79,7 @@
 .field-label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #4a4a4a;
+  color: var(--ec-muted);
   letter-spacing: 0.1px;
 }
 .field-input-wrap {
@@ -100,15 +100,15 @@
   border: 1.5px solid #e8e8e8;
   border-radius: 10px;
   font-size: 0.9rem;
-  color: #1b1b1b;
-  background: #fafafa;
+  color: var(--ec-heading);
+  background: var(--ec-surface-2);
   outline: none;
   transition: border-color 0.2s, background 0.2s;
 }
-.field-input::placeholder { color: #c4c4c4; }
+.field-input::placeholder { color: var(--ec-subtle); }
 .field-input:focus {
   border-color: #1b6b3a;
-  background: #fff;
+  background: var(--ec-card);
 }
 .field-eye {
   position: absolute;
@@ -197,18 +197,18 @@
 }
 .footer-link {
   font-size: 0.78rem;
-  color: #888;
+  color: var(--ec-subtle);
   text-decoration: none;
   transition: color 0.2s;
 }
 .footer-link:hover { color: #1b6b3a; text-decoration: underline; }
-.footer-dot { color: #ccc; font-size: 0.78rem; }
+.footer-dot { color: var(--ec-subtle); font-size: 0.78rem; }
 .footer-support {
   display: flex;
   align-items: center;
   gap: 5px;
   font-size: 0.78rem;
-  color: #aaa;
+  color: var(--ec-subtle);
   margin-top: 2px;
 }
 

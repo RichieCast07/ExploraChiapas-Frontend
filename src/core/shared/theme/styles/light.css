@@ -1,0 +1,36 @@
+:root,
+html[data-theme='light'] {
+  --ec-bg: #f5f8f5;
+
+  --ec-surface: #ffffff;
+  --ec-surface-2: #f3f6f3;
+  --ec-card: #ffffff;
+
+  --ec-sidebar: #f8faf8;
+  --ec-input-bg: #ffffff;
+  --ec-hover: #edf3ee;
+
+  --ec-text: #202720;
+  --ec-heading: #182019;
+  --ec-muted: #677168;
+  --ec-subtle: #89928a;
+
+  --ec-border: #dce4dd;
+
+  --ec-green-100: #dcfce7;
+  --ec-green-50: #f0fdf4;
+
+  --ec-orange-100: #ffedd5;
+  --ec-blue-100: #e0f2fe;
+  --ec-red-100: #fee2e2;
+
+  --ec-success-bg: #ecfdf3;
+  --ec-success-border: #a7f3c2;
+  --ec-success-text: #15803d;
+
+  --ec-shadow:
+    0 8px 24px rgba(34, 68, 42, 0.07);
+
+  --ec-shadow-strong:
+    0 16px 38px rgba(24, 52, 31, 0.12);
+}

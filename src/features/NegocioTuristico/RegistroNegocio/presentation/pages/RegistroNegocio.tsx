@@ -412,8 +412,7 @@ export function RegistroNegocio() {
               state:
                 state.trim() ||
                 null,
-              mapProvider:
-                'manual',
+              mapProvider: 'openstreetmap',
             }),
           },
         );

@@ -215,7 +215,7 @@ export function AdminNegociosPage() {
     <div
       style={{
         minHeight: '100vh',
-        background: '#f5f7f5',
+        background: 'var(--ec-bg)',
       }}
     >
       <Sidebar
@@ -267,7 +267,7 @@ export function AdminNegociosPage() {
 
             <p
               style={{
-                color: '#6b7280',
+                color: 'var(--ec-muted)',
                 marginTop: 4,
               }}
             >
@@ -289,9 +289,9 @@ export function AdminNegociosPage() {
               gap: 8,
               padding: '10px 18px',
               border:
-                '1px solid #d1d5db',
+                '1px solid var(--ec-border)',
               borderRadius: 8,
-              background: '#fff',
+              background: 'var(--ec-card)',
               cursor: isLoading
                 ? 'not-allowed'
                 : 'pointer',
@@ -353,10 +353,10 @@ export function AdminNegociosPage() {
 
         <div
           style={{
-            background: '#fff',
+            background: 'var(--ec-card)',
             borderRadius: 12,
             border:
-              '1px solid #e5e7eb',
+              '1px solid var(--ec-border)',
             overflow: 'hidden',
           }}
         >
@@ -367,7 +367,7 @@ export function AdminNegociosPage() {
                 textAlign:
                   'center',
                 color:
-                  '#9ca3af',
+                  'var(--ec-subtle)',
               }}
             >
               Cargando solicitudes...
@@ -381,7 +381,7 @@ export function AdminNegociosPage() {
                 textAlign:
                   'center',
                 color:
-                  '#9ca3af',
+                  'var(--ec-subtle)',
               }}
             >
               <Briefcase
@@ -415,9 +415,9 @@ export function AdminNegociosPage() {
                   <tr
                     style={{
                       background:
-                        '#f9fafb',
+                        'var(--ec-surface-2)',
                       borderBottom:
-                        '1px solid #e5e7eb',
+                        '1px solid var(--ec-border)',
                     }}
                   >
                     <th
@@ -429,7 +429,7 @@ export function AdminNegociosPage() {
                         fontWeight:
                           600,
                         color:
-                          '#374151',
+                          'var(--ec-text)',
                       }}
                     >
                       Negocio
@@ -444,7 +444,7 @@ export function AdminNegociosPage() {
                         fontWeight:
                           600,
                         color:
-                          '#374151',
+                          'var(--ec-text)',
                       }}
                     >
                       Tipo
@@ -459,7 +459,7 @@ export function AdminNegociosPage() {
                         fontWeight:
                           600,
                         color:
-                          '#374151',
+                          'var(--ec-text)',
                       }}
                     >
                       Municipio
@@ -474,7 +474,7 @@ export function AdminNegociosPage() {
                         fontWeight:
                           600,
                         color:
-                          '#374151',
+                          'var(--ec-text)',
                       }}
                     >
                       Estado
@@ -489,7 +489,7 @@ export function AdminNegociosPage() {
                         fontWeight:
                           600,
                         color:
-                          '#374151',
+                          'var(--ec-text)',
                       }}
                     >
                       Acciones
@@ -512,7 +512,7 @@ export function AdminNegociosPage() {
                             index <
                             negocios.length -
                               1
-                              ? '1px solid #f3f4f6'
+                              ? '1px solid var(--ec-surface-2)'
                               : 'none',
                         }}
                       >
@@ -540,7 +540,7 @@ export function AdminNegociosPage() {
                                 fontSize:
                                   12,
                                 color:
-                                  '#9ca3af',
+                                  'var(--ec-subtle)',
                               }}
                             >
                               {
@@ -558,7 +558,7 @@ export function AdminNegociosPage() {
                                 fontSize:
                                   11,
                                 color:
-                                  '#9ca3af',
+                                  'var(--ec-subtle)',
                               }}
                             >
                               {
@@ -575,7 +575,7 @@ export function AdminNegociosPage() {
                             padding:
                               '14px 16px',
                             color:
-                              '#6b7280',
+                              'var(--ec-muted)',
                           }}
                         >
                           {
@@ -588,7 +588,7 @@ export function AdminNegociosPage() {
                             padding:
                               '14px 16px',
                             color:
-                              '#6b7280',
+                              'var(--ec-muted)',
                           }}
                         >
                           {negocio.municipality ??

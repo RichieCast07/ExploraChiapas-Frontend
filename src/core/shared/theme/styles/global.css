@@ -1,0 +1,274 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  background: var(--ec-bg);
+}
+
+body {
+  margin: 0;
+
+  background:
+    var(--ec-bg);
+
+  color:
+    var(--ec-text);
+
+  transition:
+    background-color var(--ec-transition-normal),
+    color var(--ec-transition-normal);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+/* ==========================================================
+   ESTRUCTURA GLOBAL
+   ========================================================== */
+
+.panel-shell,
+.panel-shell__body,
+.panel-shell__content,
+.ec-page {
+  color:
+    var(--ec-text);
+}
+
+.panel-shell,
+.panel-shell__body {
+  background:
+    var(--ec-bg);
+}
+
+.panel-topbar {
+  background:
+    color-mix(
+      in srgb,
+      var(--ec-surface) 95%,
+      transparent
+    );
+
+  border-color:
+    var(--ec-border);
+}
+
+/* ==========================================================
+   SUPERFICIES
+   ========================================================== */
+
+.ec-card,
+.ec-stat-card,
+.ec-toolbar {
+  background:
+    var(--ec-card);
+
+  color:
+    var(--ec-text);
+
+  border-color:
+    var(--ec-border);
+}
+
+.ec-card h1,
+.ec-card h2,
+.ec-card h3,
+.ec-stat-card h1,
+.ec-stat-card h2,
+.ec-stat-card h3 {
+  color:
+    var(--ec-heading);
+}
+
+/* ==========================================================
+   FORMULARIOS
+   ========================================================== */
+
+.ec-input,
+.ec-select,
+.ec-textarea,
+.ec-search,
+input,
+textarea,
+select {
+  color:
+    var(--ec-text);
+}
+
+.ec-input,
+.ec-select,
+.ec-textarea {
+  background:
+    var(--ec-input-bg);
+
+  border-color:
+    var(--ec-border);
+}
+
+.ec-input::placeholder,
+.ec-textarea::placeholder,
+input::placeholder,
+textarea::placeholder {
+  color:
+    var(--ec-subtle);
+}
+
+/* ==========================================================
+   TABLAS
+   ========================================================== */
+
+.ec-table {
+  color:
+    var(--ec-text);
+}
+
+.ec-table th {
+  background:
+    var(--ec-surface-2);
+
+  color:
+    var(--ec-muted);
+}
+
+.ec-table td {
+  color:
+    var(--ec-text);
+
+  border-color:
+    var(--ec-border);
+}
+
+.ec-table tbody tr:hover {
+  background:
+    var(--ec-hover);
+}
+
+/* ==========================================================
+   CALLOUT GENERAL
+   ========================================================== */
+
+.ec-callout {
+  padding:
+    20px;
+
+  border:
+    1px solid
+    var(--ec-success-border);
+
+  border-radius:
+    var(--ec-radius-md);
+
+  background:
+    var(--ec-success-bg);
+
+  color:
+    var(--ec-success-text);
+}
+
+.ec-callout h3 {
+  margin:
+    0 0 8px;
+
+  color:
+    var(--ec-success-text);
+
+  font-size:
+    14px;
+}
+
+.ec-callout p {
+  margin:
+    0;
+
+  color:
+    var(--ec-success-text);
+
+  font-size:
+    13px;
+}
+
+/* ==========================================================
+   FALLBACK DARK PARA COMPONENTES LEGACY
+   ========================================================== */
+
+html[data-theme='dark'] .panel-shell,
+html[data-theme='dark'] .panel-shell__body,
+html[data-theme='dark'] .panel-shell__content {
+  background-color:
+    var(--ec-bg);
+}
+
+html[data-theme='dark'] .panel-topbar,
+html[data-theme='dark'] .ec-card,
+html[data-theme='dark'] .ec-stat-card,
+html[data-theme='dark'] .ec-toolbar {
+  background-color:
+    var(--ec-card);
+}
+
+html[data-theme='dark'] hr {
+  border-color:
+    var(--ec-border);
+}
+
+html[data-theme='dark'] ::selection {
+  background:
+    var(--ec-green-700);
+
+  color:
+    #ffffff;
+}
+
+/* Autenticación legacy */
+
+html[data-theme='dark'] .login-root,
+html[data-theme='dark'] .register-root {
+  background:
+    radial-gradient(
+      circle at 20% 10%,
+      #173221 0,
+      #0d1310 42%,
+      #090e0b 100%
+    );
+}
+
+html[data-theme='dark'] .login-card,
+html[data-theme='dark'] .register-card {
+  background:
+    var(--ec-card);
+
+  color:
+    var(--ec-text);
+
+  box-shadow:
+    var(--ec-shadow-strong);
+}
+
+html[data-theme='dark'] .field-input {
+  background:
+    var(--ec-input-bg);
+
+  color:
+    var(--ec-text);
+
+  border-color:
+    var(--ec-border);
+}

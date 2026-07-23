@@ -230,8 +230,7 @@ export function Eventos() {
                 form.municipality.trim() ||
                 null,
               state: 'Chiapas',
-              mapProvider:
-                'manual',
+              mapProvider: 'openstreetmap',
             }),
           },
         );

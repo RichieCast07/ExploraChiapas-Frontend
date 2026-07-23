@@ -6,10 +6,11 @@ import {
   Star,
   Store,
   Tag,
-  UserRound,
 } from 'lucide-react';
 
-import type { NavConfig } from '../types/NavItem';
+import type {
+  NavConfig,
+} from '../types/NavItem';
 
 export const negocioNavConfig: NavConfig = {
   main: [
@@ -36,19 +37,14 @@ export const negocioNavConfig: NavConfig = {
           path: '/negocio/resenas',
         },
         {
-          label: 'Registrar Negocio',
+          label: 'Negocios',
           icon: Store,
-          path: '/negocio/registrar',
+          path: '/negocio/negocios',
         },
         {
           label: 'Suscripción',
           icon: BadgeCheck,
           path: '/negocio/suscripcion',
-        },
-        {
-          label: 'Perfil',
-          icon: UserRound,
-          path: '/negocio/perfil',
         },
       ],
     },

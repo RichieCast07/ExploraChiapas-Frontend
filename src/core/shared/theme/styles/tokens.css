@@ -1,0 +1,17 @@
+:root {
+  --ec-radius-sm: 7px;
+  --ec-radius-md: 10px;
+  --ec-radius-lg: 14px;
+
+  --ec-transition-fast: 150ms ease;
+  --ec-transition-normal: 220ms ease;
+
+  --ec-green-900: #14532d;
+  --ec-green-800: #166534;
+  --ec-green-700: #15803d;
+  --ec-green-600: #16a34a;
+
+  --ec-orange-600: #ea580c;
+  --ec-blue-600: #0284c7;
+  --ec-red-600: #dc2626;
+}

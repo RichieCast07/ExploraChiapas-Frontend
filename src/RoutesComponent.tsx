@@ -10,6 +10,7 @@ import { NegocioHomePage } from './features/NegocioTuristico/Home/presentation/p
 import { BusinessProfilePage } from './features/NegocioTuristico/Perfil/presentation/pages/BusinessProfilePage';
 import { NegocioPerfilPage } from './features/NegocioTuristico/Perfil/presentation/pages/NegocioPerfilPage';
 import { NuevaPromocionPage } from './features/NegocioTuristico/Promociones/presentation/pages/FormularioPromociones';
+import { EditarPromocionPage } from './features/NegocioTuristico/Promociones/presentation/pages/EditarPromocionPage';
 import { PromocionesPage } from './features/NegocioTuristico/Promociones/presentation/pages/PromocionesPage';
 import { RegistroNegocio } from './features/NegocioTuristico/RegistroNegocio/presentation/pages/RegistroNegocio';
 import { ReseñasPage } from './features/NegocioTuristico/Reseñas/presentation/pages/Reseñas';
@@ -71,6 +72,15 @@ export default function RoutesComponent() {
       />
 
       <Route
+        path="/negocio/promociones/:id/editar"
+        element={
+          <ProtectedRoute allowedRoles={['admin_negocio']}>
+            <EditarPromocionPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/negocio/resenas"
         element={
           <ProtectedRoute allowedRoles={['admin_negocio']}>
@@ -94,11 +104,21 @@ export default function RoutesComponent() {
       />
 
       <Route
-        path="/negocio/perfil"
+        path="/negocio/negocios"
         element={
           <ProtectedRoute allowedRoles={['admin_negocio']}>
             <BusinessProfilePage />
           </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/negocio/perfil"
+        element={
+          <Navigate
+            to="/negocio/negocios"
+            replace
+          />
         }
       />
 

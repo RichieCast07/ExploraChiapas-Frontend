@@ -1,4 +1,4 @@
-import { Camera, Clock3, Eye, ImagePlus, Plus, Tag, X } from 'lucide-react';
+import { Camera, Clock3, Eye, ImagePlus, Images, Plus, Tag, Trash2, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -44,6 +44,17 @@ interface BusinessLocation {
   state: string | null;
 }
 
+
+interface BusinessGalleryImage {
+  id: string;
+  businessId: string;
+  imageUrl: string;
+  description: string | null;
+  order: number;
+  isCover: boolean;
+  createdAt: string;
+}
+
 const initialSchedules: Schedule[] = days.map((_, index) => ({
   dayOfWeek: index + 1,
   openingTime: null,
@@ -69,6 +80,9 @@ export function BusinessProfilePage() {
   const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [gallery, setGallery] = useState<BusinessGalleryImage[]>([]);
+  const [isGalleryUploading, setIsGalleryUploading] = useState(false);
+  const [deletingGalleryImageId, setDeletingGalleryImageId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -96,6 +110,7 @@ export function BusinessProfilePage() {
         loadedLocation,
         loadedSchedules,
         loadedServices,
+        loadedGallery,
       ] = await Promise.all([
         apiRequest<BusinessLocation>(
           `/locations/${selected.locationId}`,
@@ -112,6 +127,12 @@ export function BusinessProfilePage() {
           {},
           false,
         ),
+
+        apiRequest<BusinessGalleryImage[]>(
+          `/businesses/${selected.id}/gallery`,
+          {},
+          false,
+        ),
       ]);
 
       setAddress(loadedLocation.address ?? '');
@@ -123,6 +144,7 @@ export function BusinessProfilePage() {
       }
 
       setPersistedServices(loadedServices);
+      setGallery(loadedGallery);
       setServices(
         loadedServices.map(
           (service) => service.name,
@@ -155,6 +177,113 @@ export function BusinessProfilePage() {
     if (!file) return;
     setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const uploadGalleryImages = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (!business) return;
+
+    const files = Array.from(event.target.files ?? []);
+
+    event.target.value = '';
+
+    if (!files.length) return;
+
+    if (files.length > 10) {
+      setError('Puedes subir hasta 10 fotografías a la vez.');
+      return;
+    }
+
+    const allowedTypes = new Set([
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+    ]);
+
+    const invalidFile = files.find(
+      (file) => !allowedTypes.has(file.type),
+    );
+
+    if (invalidFile) {
+      setError('La galería acepta únicamente imágenes JPG, PNG o WEBP.');
+      return;
+    }
+
+    setIsGalleryUploading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+
+      files.forEach((file) => {
+        formData.append('imagenes', file);
+      });
+
+      const updatedGallery =
+        await apiRequest<BusinessGalleryImage[]>(
+          `/businesses/${business.id}/gallery`,
+          {
+            method: 'POST',
+            body: formData,
+          },
+        );
+
+      setGallery(updatedGallery);
+
+      setMessage(
+        files.length === 1
+          ? 'Fotografía agregada a la galería.'
+          : `${files.length} fotografías agregadas a la galería.`,
+      );
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'No se pudieron subir las fotografías',
+      );
+    } finally {
+      setIsGalleryUploading(false);
+    }
+  };
+
+  const deleteGalleryImage = async (
+    image: BusinessGalleryImage,
+  ) => {
+    if (!business) return;
+
+    const confirmed = window.confirm(
+      '¿Eliminar esta fotografía de la galería?',
+    );
+
+    if (!confirmed) return;
+
+    setDeletingGalleryImageId(image.id);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const updatedGallery =
+        await apiRequest<BusinessGalleryImage[]>(
+          `/businesses/${business.id}/gallery/${image.id}`,
+          {
+            method: 'DELETE',
+          },
+        );
+
+      setGallery(updatedGallery);
+      setMessage('Fotografía eliminada de la galería.');
+    } catch (requestError) {
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'No se pudo eliminar la fotografía',
+      );
+    } finally {
+      setDeletingGalleryImageId(null);
+    }
   };
 
   const save = async () => {
@@ -277,6 +406,48 @@ export function BusinessProfilePage() {
   return (
     <PanelShell kind="business">
       <div className="ec-page business-profile-page">
+        <div className="ec-page-header">
+          <div className="ec-page-header__copy">
+            <div className="ec-breadcrumb">
+              Negocios
+              <span>›</span>
+              Mis negocios
+            </div>
+
+            <h1 className="ec-page-title">
+              Mis negocios
+            </h1>
+
+            <p className="ec-page-subtitle">
+              Registra y administra los negocios
+              asociados a tu cuenta.
+            </p>
+          </div>
+
+          <div className="ec-actions">
+            <Link
+              className="ec-button ec-button--primary"
+              to="/negocio/registrar"
+            >
+              <Plus size={16} />
+              Registrar negocio
+            </Link>
+          </div>
+        </div>
+
+        <div className="ec-note">
+          <strong>
+            Verificación de negocios
+          </strong>
+
+          <div style={{ marginTop: 5 }}>
+            Cada negocio registrado será evaluado
+            por la administración de ExploraChiapas
+            para comprobar su existencia y validar
+            su información antes de mostrarse
+            públicamente en la plataforma.
+          </div>
+        </div>
         {message && <div className="ec-note">{message}</div>}
         {error && <div className="ec-note" style={{ borderColor: '#ef4444', color: '#991b1b' }}>{error}</div>}
         {isLoading && <div className="ec-note">Cargando perfil del negocio...</div>}
@@ -290,7 +461,7 @@ export function BusinessProfilePage() {
 
         {business && (
           <>
-            <section className="business-profile-cover"><img src={coverUrl ?? hero} alt="Paisaje del negocio" /><label className="ec-button" style={{ cursor: 'pointer' }}><input type="file" accept="image/*" hidden onChange={handleCover} /><Camera size={15} /> Editar Portada</label></section>
+            <section className="business-profile-cover"><img src={coverUrl ?? hero} alt="Paisaje del negocio" onError={(event) => { event.currentTarget.onerror = null; event.currentTarget.src = hero; }} /><label className="ec-button" style={{ cursor: 'pointer' }}><input type="file" accept="image/*" hidden onChange={handleCover} /><Camera size={15} /> Editar Portada</label></section>
 
             <div className="business-profile-grid">
               <div className="business-profile-main">
@@ -298,7 +469,159 @@ export function BusinessProfilePage() {
 
                 <section className="ec-card"><div className="ec-card__header business-profile-section-title"><h2><Clock3 size={17} /> Gestión de Horarios</h2></div><div className="ec-card__body business-hours-list">{days.map((day, index) => { const schedule = schedules.find((item) => item.dayOfWeek === index + 1) ?? initialSchedules[index]; return <div key={day}><button className={`profile-toggle ${!schedule.closed ? 'active' : ''}`} type="button" onClick={() => updateSchedule(index + 1, { closed: !schedule.closed })}><span /></button><strong>{day}</strong><input type="time" value={hhmm(schedule.openingTime)} disabled={schedule.closed} onChange={(event) => updateSchedule(index + 1, { openingTime: event.target.value })} /><span>a</span><input type="time" value={hhmm(schedule.closingTime)} disabled={schedule.closed} onChange={(event) => updateSchedule(index + 1, { closingTime: event.target.value })} /></div>; })}</div></section>
 
-                <section className="ec-card"><div className="ec-card__header business-profile-section-title"><h2><Camera size={17} /> Imagen principal</h2></div><div className="business-profile-gallery"><div className="gallery-photo" style={{ overflow: 'hidden' }}>{coverUrl ? <img src={coverUrl} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : '🌿'}</div><label><input type="file" accept="image/*" hidden onChange={handleCover} /><ImagePlus size={22} /><small>Nueva portada</small></label></div></section>
+                <section className="ec-card business-media-card">
+                  <div className="ec-card__header business-profile-section-title business-media-header">
+                    <div>
+                      <h2>
+                        <Images size={17} />
+                        Fotografías del negocio
+                      </h2>
+
+                      <p>
+                        Mantén una portada clara y una galería que muestre la experiencia real del establecimiento.
+                      </p>
+                    </div>
+
+                    <span className="business-gallery-count">
+                      {gallery.length}/20
+                    </span>
+                  </div>
+
+                  <div className="business-media-body">
+                    <div className="business-cover-editor">
+                      <div className="business-media-label">
+                        <strong>Portada</strong>
+                        <span>Imagen principal mostrada en el perfil del negocio.</span>
+                      </div>
+
+                      <div className="business-cover-preview">
+                        <img
+                          src={coverUrl ?? hero}
+                          alt="Portada del negocio"
+                          onError={(event) => {
+                            event.currentTarget.onerror = null;
+                            event.currentTarget.src = hero;
+                          }}
+                        />
+
+                        <label
+                          className="business-cover-action"
+                          title="Cambiar portada"
+                        >
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                            onChange={handleCover}
+                          />
+
+                          <Camera size={17} />
+                          Cambiar portada
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="business-gallery-divider" />
+
+                    <div className="business-gallery-heading">
+                      <div className="business-media-label">
+                        <strong>Galería</strong>
+                        <span>
+                          Añade fotografías de habitaciones, platillos, instalaciones, productos o experiencias.
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="business-real-gallery">
+                      {gallery.map((image) => {
+                        const imageUrl =
+                          resolveMediaUrl(image.imageUrl) ?? hero;
+
+                        return (
+                          <article
+                            className="business-gallery-item"
+                            key={image.id}
+                          >
+                            <img
+                              src={imageUrl}
+                              alt="Fotografía del negocio"
+                              loading="lazy"
+                              onError={(event) => {
+                                event.currentTarget.onerror = null;
+                                event.currentTarget.src = hero;
+                              }}
+                            />
+
+                            <div className="business-gallery-overlay">
+                              <span>
+                                Foto {image.order + 1}
+                              </span>
+
+                              <button
+                                type="button"
+                                title="Eliminar fotografía"
+                                disabled={
+                                  deletingGalleryImageId === image.id
+                                }
+                                onClick={() =>
+                                  void deleteGalleryImage(image)
+                                }
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </article>
+                        );
+                      })}
+
+                      {gallery.length < 20 && (
+                        <label
+                          className={`business-gallery-upload ${
+                            isGalleryUploading ? 'is-loading' : ''
+                          }`}
+                        >
+                          <input
+                            type="file"
+                            multiple
+                            accept="image/jpeg,image/png,image/webp"
+                            hidden
+                            disabled={isGalleryUploading}
+                            onChange={(event) =>
+                              void uploadGalleryImages(event)
+                            }
+                          />
+
+                          <span className="business-gallery-upload-icon">
+                            <ImagePlus size={23} />
+                          </span>
+
+                          <strong>
+                            {isGalleryUploading
+                              ? 'Subiendo...'
+                              : 'Añadir fotos'}
+                          </strong>
+
+                          <small>
+                            JPG, PNG o WEBP
+                          </small>
+                        </label>
+                      )}
+                    </div>
+
+                    {!gallery.length && !isGalleryUploading && (
+                      <div className="business-gallery-empty">
+                        <Images size={20} />
+
+                        <div>
+                          <strong>Tu galería está vacía</strong>
+                          <span>
+                            Agrega imágenes para que los visitantes conozcan mejor tu negocio.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
               </div>
 
               <aside className="business-profile-aside">

@@ -1,5 +1,6 @@
 import {
   CalendarDays,
+  Pencil,
   Plus,
   RefreshCw,
   Tag,
@@ -385,17 +386,16 @@ export function PromocionesPage() {
                   </div>
 
                   <footer>
-                    <button
+                    <Link
                       className="ec-button ec-button--sm"
-                      type="button"
-                      disabled
+                      to={`/negocio/promociones/${promotion.id}/editar`}
                     >
                       <Pencil
                         size={14}
                       />
 
                       Editar
-                    </button>
+                    </Link>
 
                     <button
                       className="ec-button ec-button--sm promotion-delete"

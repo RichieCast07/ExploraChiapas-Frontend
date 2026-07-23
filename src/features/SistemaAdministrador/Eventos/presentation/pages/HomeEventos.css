@@ -1,10 +1,10 @@
 .admin-events-filters { padding: 14px; }
 .admin-events-filter-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .admin-events-filter-row .ec-select { width: auto; min-width: 180px; }
-.admin-events-view-switch { display: inline-flex; gap: 3px; margin-top: 13px; padding: 3px; border-radius: 7px; background: #f0f4f0; }
+.admin-events-view-switch { display: inline-flex; gap: 3px; margin-top: 13px; padding: 3px; border-radius: 7px; background: var(--ec-surface-2); }
 .admin-events-view-switch button { min-height: 32px; display: flex; align-items: center; gap: 6px; padding: 0 12px; border: 0; border-radius: 5px; background: transparent; color: #677168; font-size: 11px; cursor: pointer; }
 .admin-events-view-switch button.active { background: #167635; color: #fff; }
-.admin-event-thumb { width: 42px; height: 35px; display: grid; place-items: center; border-radius: 6px; background: #eef3ee; font-size: 19px; }
+.admin-event-thumb { width: 42px; height: 35px; display: grid; place-items: center; border-radius: 6px; background: var(--ec-surface-2); font-size: 19px; }
 .admin-event-actions { display: flex; gap: 7px; }
 .admin-event-actions button { width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: transparent; color: #17773a; cursor: pointer; }
 .admin-event-actions button.danger { color: #c63e39; }

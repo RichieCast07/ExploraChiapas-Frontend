@@ -17,7 +17,7 @@ export function DashboardLayout({ role }: DashboardLayoutProps) {
   return (
     <div className="flex">
       <Sidebar config={navConfig} onLogout={logout} />
-      <main className="flex-1 bg-white min-h-screen overflow-y-auto">
+      <main className="flex-1 min-h-screen overflow-y-auto" style={{ background: 'var(--ec-bg)', color: 'var(--ec-text)' }}>
         <Outlet />
       </main>
     </div>

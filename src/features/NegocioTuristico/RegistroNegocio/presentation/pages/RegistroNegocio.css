@@ -198,7 +198,7 @@
   height: 10px;
   display: block;
   border-radius: 50%;
-  background: #fff;
+  background: var(--ec-card);
 }
 
 .business-coordinates {

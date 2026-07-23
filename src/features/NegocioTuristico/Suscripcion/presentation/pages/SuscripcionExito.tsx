@@ -6,7 +6,7 @@ export function SuscripcionExito() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0fdf4' }}>
-      <div style={{ textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', maxWidth: '420px', width: '90%' }}>
+      <div style={{ textAlign: 'center', padding: '40px', background: 'var(--ec-card)', borderRadius: '16px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)', maxWidth: '420px', width: '90%' }}>
         <BadgeCheck size={64} color="#16a34a" style={{ marginBottom: '16px' }} />
         <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#15803d', marginBottom: '12px' }}>
           Suscripción activada

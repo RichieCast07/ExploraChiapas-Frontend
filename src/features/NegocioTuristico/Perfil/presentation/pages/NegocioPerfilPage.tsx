@@ -63,19 +63,19 @@ export function NegocioPerfilPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f7f5' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--ec-bg)' }}>
       <Sidebar config={negocioNavConfig} onLogout={logout} />
       <div style={{ marginLeft: 260, minHeight: '100vh', fontFamily: 'Inter, system-ui, sans-serif' }}>
-        <header style={{ background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '0 32px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <header style={{ background: 'var(--ec-card)', borderBottom: '1px solid var(--ec-border)', padding: '0 32px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>ExploraChiapas</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280' }}>
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ec-muted)' }}>
               <Bell size={20} />
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600 }}>{nombre || '...'}</div>
-                <div style={{ fontSize: 11, color: '#9ca3af' }}>Administrador</div>
+                <div style={{ fontSize: 11, color: 'var(--ec-subtle)' }}>Administrador</div>
               </div>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#16a34a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 16 }}>
                 {(nombre || '?').charAt(0).toUpperCase()}
@@ -86,7 +86,7 @@ export function NegocioPerfilPage() {
 
         <main style={{ padding: 32 }}>
           <h2 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 700 }}>Mi Perfil</h2>
-          <p style={{ margin: '0 0 28px', color: '#6b7280' }}>Actualiza los datos de tu cuenta.</p>
+          <p style={{ margin: '0 0 28px', color: 'var(--ec-muted)' }}>Actualiza los datos de tu cuenta.</p>
 
           {mensaje && (
             <div style={{ background: mensaje.tipo === 'ok' ? '#f0fdf4' : '#fef2f2', border: `1px solid ${mensaje.tipo === 'ok' ? '#bbf7d0' : '#fca5a5'}`, borderRadius: 8, padding: '12px 16px', marginBottom: 20, color: mensaje.tipo === 'ok' ? '#15803d' : '#b91c1c', fontWeight: 500 }}>
@@ -95,10 +95,10 @@ export function NegocioPerfilPage() {
           )}
 
           {isLoading ? (
-            <p style={{ color: '#9ca3af' }}>Cargando perfil...</p>
+            <p style={{ color: 'var(--ec-subtle)' }}>Cargando perfil...</p>
           ) : (
             <form onSubmit={(e) => { void handleGuardar(e); }} style={{ maxWidth: 520 }}>
-              <div style={{ background: '#fff', borderRadius: 12, border: '1px solid #e5e7eb', padding: 24, marginBottom: 20 }}>
+              <div style={{ background: 'var(--ec-card)', borderRadius: 12, border: '1px solid var(--ec-border)', padding: 24, marginBottom: 20 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
                   <User size={18} color="#16a34a" />
                   <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>Información personal</h2>
@@ -110,7 +110,7 @@ export function NegocioPerfilPage() {
                     type="text"
                     value={nombre}
                     onChange={e => setNombre(e.target.value)}
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--ec-border)', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }}
                   />
                 </div>
 
@@ -120,9 +120,9 @@ export function NegocioPerfilPage() {
                     type="email"
                     value={email}
                     disabled
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5e7eb', borderRadius: 8, fontSize: 14, boxSizing: 'border-box', background: '#f9fafb', color: '#9ca3af' }}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--ec-border)', borderRadius: 8, fontSize: 14, boxSizing: 'border-box', background: 'var(--ec-surface-2)', color: 'var(--ec-subtle)' }}
                   />
-                  <p style={{ margin: '4px 0 0', fontSize: 12, color: '#9ca3af' }}>El correo no puede cambiarse desde aquí.</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12, color: 'var(--ec-subtle)' }}>El correo no puede cambiarse desde aquí.</p>
                 </div>
 
                 <div>
@@ -132,7 +132,7 @@ export function NegocioPerfilPage() {
                     value={telefono}
                     onChange={e => setTelefono(e.target.value)}
                     placeholder="+52 961 000 0000"
-                    style={{ width: '100%', padding: '10px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', border: '1px solid var(--ec-border)', borderRadius: 8, fontSize: 14, boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function NegocioPerfilPage() {
               <button
                 type="submit"
                 disabled={isSaving}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', background: isSaving ? '#9ca3af' : '#16a34a', color: '#fff', border: 'none', borderRadius: 8, cursor: isSaving ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px', background: isSaving ? 'var(--ec-subtle)' : '#16a34a', color: '#fff', border: 'none', borderRadius: 8, cursor: isSaving ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}
               >
                 <Save size={16} />
                 {isSaving ? 'Guardando...' : 'Guardar cambios'}
