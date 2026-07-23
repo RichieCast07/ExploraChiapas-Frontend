@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ProtectedRoute } from './core/shared/components/ProtectedRoute';
-import { PremiumRoute } from './core/shared/components/PremiumRoute';
 
 import LoginPage from './features/Auth/presentation/pages/Login/Login';
 import RegisterPage from './features/Auth/presentation/pages/Register/Register';
@@ -136,12 +135,12 @@ export default function RoutesComponent() {
       />
 
 
-      <Route path="/negocio/inteligencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
-      <Route path="/negocio/inteligencia/reportes" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
-      <Route path="/negocio/inteligencia/tendencias" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
-      <Route path="/negocio/inteligencia/oportunidades" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
-      <Route path="/negocio/inteligencia/audiencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
-      <Route path="/negocio/inteligencia/sostenibilidad" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumRoute><PremiumIntelligencePage /></PremiumRoute></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/reportes" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/tendencias" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/oportunidades" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/audiencia" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
+      <Route path="/negocio/inteligencia/sostenibilidad" element={<ProtectedRoute allowedRoles={['admin_negocio']}><PremiumIntelligencePage /></ProtectedRoute>} />
 
       <Route
         path="/negocio/suscripcion"
@@ -154,11 +153,7 @@ export default function RoutesComponent() {
 
       <Route
         path="/negocio/suscripcion/exito"
-        element={
-          <ProtectedRoute allowedRoles={['admin_negocio']}>
-            <SuscripcionExito />
-          </ProtectedRoute>
-        }
+        element={<SuscripcionExito />}
       />
 
       <Route

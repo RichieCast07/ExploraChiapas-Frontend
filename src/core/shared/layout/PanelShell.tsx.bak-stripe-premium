@@ -24,10 +24,6 @@ import {
 } from '../api/apiClient';
 
 import {
-  getPremiumSubscriptionStatus,
-} from '../api/premiumSubscription';
-
-import {
   adminNavConfig,
 } from '../config/navigation/adminNavConfig';
 
@@ -94,9 +90,6 @@ export function PanelShell({
       null,
     );
 
-  const [isPremium, setIsPremium] =
-    useState(false);
-
   const storedName =
     localStorage.getItem(
       'user_name',
@@ -130,29 +123,6 @@ export function PanelShell({
         // con los datos locales.
       });
   }, []);
-
-  useEffect(() => {
-    if (isAdmin) return;
-    let cancelled = false;
-
-    const loadPremiumStatus = async () => {
-      try {
-        const status = await getPremiumSubscriptionStatus();
-        if (!cancelled) setIsPremium(status.isPremium);
-      } catch {
-        if (!cancelled) setIsPremium(false);
-      }
-    };
-
-    void loadPremiumStatus();
-    const handlePremiumUpdated = () => { void loadPremiumStatus(); };
-    window.addEventListener('ec-premium-updated', handlePremiumUpdated);
-
-    return () => {
-      cancelled = true;
-      window.removeEventListener('ec-premium-updated', handlePremiumUpdated);
-    };
-  }, [isAdmin]);
 
   useEffect(() => {
     const handleProfileUpdated = (
@@ -210,26 +180,15 @@ export function PanelShell({
       .charAt(0)
       .toUpperCase();
 
-  const navigationConfig =
-    isAdmin
-      ? adminNavConfig
-      : {
-          ...negocioNavConfig,
-          main: negocioNavConfig.main.map((section) => ({
-            ...section,
-            items: section.items.filter((item) =>
-              item.path !== '/negocio/inteligencia' || isPremium
-            ),
-          })),
-        };
-
   return (
     <div
       className={`panel-shell panel-shell--${kind}`}
     >
       <Sidebar
         config={
-          navigationConfig
+          isAdmin
+            ? adminNavConfig
+            : negocioNavConfig
         }
         onLogout={logout}
       />
@@ -407,11 +366,11 @@ export function PanelShell({
 
                       <span>
                         <strong>
-                          {isPremium ? 'Premium activo' : 'Activar Premium'}
+                          Premium
                         </strong>
 
                         <small>
-                          {isPremium ? 'Inteligencia Premium disponible' : 'Desbloquea Inteligencia Premium'}
+                          Consulta tu plan y beneficios
                         </small>
                       </span>
                     </Link>

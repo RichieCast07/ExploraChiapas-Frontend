@@ -97,7 +97,7 @@ export function ReseñasPage() {
                 <div className="resena-item__body">
                   <div className="resena-item__top">
                     <div>
-                      <span className="resena-item__nombre">Usuario · {r.businessName}</span>
+                      <span className="resena-item__nombre">Usuario</span>
                       <div className="resena-item__stars">
                         {Array.from({ length: 5 }).map((_, i) => (
                           <Star
